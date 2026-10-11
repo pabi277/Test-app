@@ -49,36 +49,40 @@ class PaisaDatabaseTest {
         )
 
         try {
-            Room.databaseBuilder(context, PaisaDatabase::class.java, databaseName)
+            val database = Room.databaseBuilder(context, PaisaDatabase::class.java, databaseName)
                 .allowMainThreadQueries()
                 .build()
-                .use { database ->
-                    val repository = PaisaRepository(database)
-                    repository.saveLoan(savedLoan)
-                    repository.saveGstCalculation(
-                        GstCalculator.calculate(
-                            amountEnteredPaise = 100_000L,
-                            rateMicroPercent = 18_000_000L,
-                            mode = GstCalculationMode.ADD,
-                            supplyType = GstSupplyType.INTRA_STATE,
-                        ),
-                        createdAtEpochMillis = gstHistory.createdAtEpochMillis,
-                    )
-                }
+            try {
+                val repository = PaisaRepository(database)
+                repository.saveLoan(savedLoan)
+                repository.saveGstCalculation(
+                    GstCalculator.calculate(
+                        amountEnteredPaise = 100_000L,
+                        rateMicroPercent = 18_000_000L,
+                        mode = GstCalculationMode.ADD,
+                        supplyType = GstSupplyType.INTRA_STATE,
+                    ),
+                    createdAtEpochMillis = gstHistory.createdAtEpochMillis,
+                )
+            } finally {
+                database.close()
+            }
 
-            Room.databaseBuilder(context, PaisaDatabase::class.java, databaseName)
+            val reopened = Room.databaseBuilder(context, PaisaDatabase::class.java, databaseName)
                 .allowMainThreadQueries()
                 .build()
-                .use { reopened ->
-                    assertEquals(
-                        listOf(savedLoan.copy(id = 1L)),
-                        reopened.savedLoanDao().observeAll().first(),
-                    )
-                    assertEquals(
-                        listOf(gstHistory.copy(id = 1L)),
-                        reopened.gstHistoryDao().observeRecent().first(),
-                    )
-                }
+            try {
+                assertEquals(
+                    listOf(savedLoan.copy(id = 1L)),
+                    reopened.savedLoanDao().observeAll().first(),
+                )
+                assertEquals(
+                    listOf(gstHistory.copy(id = 1L)),
+                    reopened.gstHistoryDao().observeRecent().first(),
+                )
+            } finally {
+                reopened.close()
+            }
         } finally {
             context.deleteDatabase(databaseName)
         }
