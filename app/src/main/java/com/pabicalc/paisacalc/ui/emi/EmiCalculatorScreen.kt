@@ -3,6 +3,7 @@ package com.pabicalc.paisacalc.ui.emi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -11,33 +12,39 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pabicalc.paisacalc.R
+import com.pabicalc.paisacalc.data.PaisaRepository
+import com.pabicalc.paisacalc.data.SavedLoanEntity
 import com.pabicalc.paisacalc.engine.EmiEngine
 import com.pabicalc.paisacalc.engine.LoanMonth
 import com.pabicalc.paisacalc.engine.LoanSummary
 import com.pabicalc.paisacalc.engine.PrepaymentFrequency
 import com.pabicalc.paisacalc.engine.PrepaymentPlan
 import com.pabicalc.paisacalc.engine.PrepaymentStrategy
-import com.pabicalc.paisacalc.ui.theme.PaisaCalcTheme
+import com.pabicalc.paisacalc.format.IndianNumberFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Typing pause before recalculating: keeps slider drags and typing smooth. */
@@ -82,7 +89,12 @@ private fun exampleInputs(): Pair<EmiInput, PrepaymentInput> = EmiInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
+fun EmiCalculatorScreen(
+    repository: PaisaRepository,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var amountText by rememberSaveable { mutableStateOf("") }
     var rateText by rememberSaveable { mutableStateOf("") }
     var tenureText by rememberSaveable { mutableStateOf("") }
@@ -104,6 +116,25 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
     val startMonth = remember { LoanMonth.now() }
     val parsedLoan = EmiInputParser.parse(input)
     val prepaymentParse = PrepaymentInputParser.parse(prepaymentInput)
+    val savedLoans by repository.observeSavedLoans().collectAsState(initial = emptyList())
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val savedMessage = stringResource(R.string.saved_loan_saved_on_device)
+    val loadedMessage = stringResource(R.string.saved_loan_loaded)
+    val deletedMessage = stringResource(R.string.saved_loan_removed)
+    val storageErrorMessage = stringResource(R.string.local_storage_error)
+    val validTerms = (parsedLoan as? EmiParseResult.Valid)?.terms
+    val generatedTitle = if (validTerms != null) {
+        stringResource(
+            R.string.saved_loan_title_format,
+            IndianNumberFormat.compactRupees(validTerms.principal),
+            DisplayFormatters.rateLabel(validTerms.rateMicroPercent),
+            DisplayFormatters.tenureLabel(validTerms.tenureMonths),
+        )
+    } else {
+        ""
+    }
+    val canSave = validTerms != null && prepaymentParse !is PrepaymentParseResult.Invalid
 
     // Parse -> Loading -> compute off the main thread -> Ready. Re-running on
     // every input change cancels the previous pass, so a stale result can
@@ -129,8 +160,60 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    val saveCurrentLoan: () -> Unit = {
+        val terms = validTerms
+        if (terms != null) {
+            val prepayment = (prepaymentParse as? PrepaymentParseResult.Active)
+                ?.plan?.prepayments?.singleOrNull()
+            val entity = SavedLoanEntity(
+                title = generatedTitle,
+                principalRupees = terms.principal,
+                rateMicroPercent = terms.rateMicroPercent,
+                tenureMonths = terms.tenureMonths,
+                prepaymentAmountRupees = prepayment?.amount ?: 0L,
+                prepaymentFromInstallment = prepayment?.fromInstallment
+                    ?: PrepaymentInput.DEFAULT_FROM_INSTALLMENT,
+                prepaymentFrequency = prepayment?.frequency?.name
+                    ?: PrepaymentFrequency.QUARTERLY.name,
+                prepaymentStrategy = prepayment?.strategy?.name
+                    ?: PrepaymentStrategy.REDUCE_TENURE.name,
+                savedAtEpochMillis = System.currentTimeMillis(),
+            )
+            coroutineScope.launch {
+                try {
+                    repository.saveLoan(entity)
+                    snackbarHostState.showSnackbar(savedMessage)
+                } catch (error: Exception) {
+                    if (error is kotlinx.coroutines.CancellationException) throw error
+                    snackbarHostState.showSnackbar(storageErrorMessage)
+                }
+            }
+        }
+    }
+    val loadSavedLoan: (SavedLoanEntity) -> Unit = { saved ->
+        val restored = saved.toInputs()
+        amountText = restored.loan.amountText
+        rateText = restored.loan.rateText
+        tenureText = restored.loan.tenureText
+        tenureUnit = restored.loan.tenureUnit
+        prepaymentInput = restored.prepayment
+        coroutineScope.launch { snackbarHostState.showSnackbar(loadedMessage) }
+    }
+    val deleteSavedLoan: (Long) -> Unit = { id ->
+        coroutineScope.launch {
+            try {
+                repository.deleteLoan(id)
+                snackbarHostState.showSnackbar(deletedMessage)
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                snackbarHostState.showSnackbar(storageErrorMessage)
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
@@ -170,6 +253,13 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
                     ) {
                         Text(stringResource(R.string.action_reset))
                     }
+                    TextButton(onClick = onToggleTheme) {
+                        Text(
+                            stringResource(
+                                if (isDarkTheme) R.string.action_theme_light else R.string.action_theme_dark,
+                            ),
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -183,6 +273,7 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
+                .consumeWindowInsets(insets)
                 .imePadding(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -199,6 +290,16 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
                         tenureText = updated.tenureText
                         tenureUnit = updated.tenureUnit
                     },
+                )
+            }
+
+            item {
+                SavedLoansCard(
+                    loans = savedLoans,
+                    canSave = canSave,
+                    onSave = saveCurrentLoan,
+                    onLoad = loadSavedLoan,
+                    onDelete = deleteSavedLoan,
                 )
             }
 
@@ -240,13 +341,5 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
                 item { ScheduleEstimateNote() }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 900)
-@Composable
-private fun EmiCalculatorScreenPreview() {
-    PaisaCalcTheme {
-        EmiCalculatorScreen()
     }
 }

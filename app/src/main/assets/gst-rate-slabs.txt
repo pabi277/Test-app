@@ -1,0 +1,15 @@
+# version=2025-09-22-v1
+# effective_from=2025-09-22
+# source=https://taxinformation.cbic.gov.in/view-pdf/1010436/ENG/Notifications
+# exemption_source=https://taxinformation.cbic.gov.in/view-pdf/1010437/ENG/Notifications
+# announcement=https://www.pib.gov.in/PressNoteDetails.aspx?id=155151&NoteId=155151&ModuleId=3&reg=48&lang=2
+# note=Convenience presets only, not an exhaustive or HSN-specific schedule. Verify each supply and current amendments with CBIC.
+id|rate_percent|label|note
+nil|0|Nil|Nil-rated or exempt supplies
+special-025|0.25|0.25%|Specified goods
+special-15|1.5|1.5%|Specified goods
+special-3|3|3%|Specified goods
+merit-5|5|5%|Common rate
+standard-18|18|18%|Common rate
+specified-28|28|28%|Specified or transition rates; verify
+special-40|40|40%|Specified luxury or demerit goods
