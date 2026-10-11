@@ -48,8 +48,20 @@ jobs:
           printf '\n84831b9409646a918e30573bab4c9c91346d8abd\n' >> "$SDK_ROOT/licenses/android-sdk-preview-license"
       - name: Run unit tests and build debug APK
         run: |
+          set -o pipefail
           chmod +x ./gradlew
-          ./gradlew --no-daemon testDebugUnitTest assembleDebug
+          ./gradlew --no-daemon testDebugUnitTest assembleDebug 2>&1 | tee build-log.txt
+      - name: Upload build log and test reports (diagnostics on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics
+          path: |
+            build-log.txt
+            app/build/reports/tests/**
+            app/build/test-results/**
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload progress APK (the downloadable result of this phase)
         uses: actions/upload-artifact@v4
         with:
