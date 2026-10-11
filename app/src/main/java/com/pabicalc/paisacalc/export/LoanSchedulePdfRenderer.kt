@@ -10,12 +10,8 @@ import java.io.OutputStream
 /** Paginates every monthly row onto a printer-friendly A4-like PDF page. */
 object LoanSchedulePdfRenderer {
 
-    private const val PAGE_WIDTH = 595
-    private const val PAGE_HEIGHT = 842
     private const val LEFT = 34f
     private const val RIGHT = 561f
-    private const val FOOTER_TOP = 812f
-    private const val ROW_HEIGHT = 19f
 
     private val emerald = 0xFF0B6E4F.toInt()
     private val darkInk = 0xFF19211D.toInt()
@@ -27,29 +23,33 @@ object LoanSchedulePdfRenderer {
     fun write(summary: LoanSummary, output: OutputStream) = write(LoanScheduleExportData.from(summary), output)
 
     fun write(data: LoanScheduleExportData, output: OutputStream) {
-        require(data.rows.isNotEmpty()) { "A loan schedule must contain at least one installment" }
+        val pages = LoanSchedulePdfLayout.paginate(data)
         val document = PdfDocument()
         try {
-            var rowIndex = 0
-            var pageNumber = 1
-            while (rowIndex < data.rows.size) {
+            pages.forEach { layout ->
                 val page = document.startPage(
-                    PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create(),
+                    PdfDocument.PageInfo.Builder(
+                        LoanSchedulePdfLayout.PAGE_WIDTH,
+                        LoanSchedulePdfLayout.PAGE_HEIGHT,
+                        layout.number,
+                    ).create(),
                 )
                 val canvas = page.canvas
                 canvas.drawColor(white)
-                var y = if (pageNumber == 1) drawFirstPageHeader(canvas, data) else drawContinuationHeader(canvas)
-                drawTableHeader(canvas, y)
-                y += 23f
-
-                while (rowIndex < data.rows.size && y + ROW_HEIGHT < FOOTER_TOP - 4f) {
-                    drawRow(canvas, data.rows[rowIndex], y, rowIndex)
-                    y += ROW_HEIGHT
-                    rowIndex++
+                var y = if (layout.number == 1) {
+                    drawFirstPageHeader(canvas, data)
+                } else {
+                    drawContinuationHeader(canvas)
                 }
-                drawFooter(canvas, pageNumber)
+                drawTableHeader(canvas, y)
+                y += LoanSchedulePdfLayout.TABLE_HEADER_HEIGHT
+
+                layout.rows.forEachIndexed { pageRowIndex, row ->
+                    drawRow(canvas, row, y, layout.firstRowIndex + pageRowIndex)
+                    y += LoanSchedulePdfLayout.ROW_HEIGHT
+                }
+                drawFooter(canvas, layout.number)
                 document.finishPage(page)
-                pageNumber++
             }
             document.writeTo(output)
         } finally {
@@ -59,29 +59,30 @@ object LoanSchedulePdfRenderer {
 
     private fun drawFirstPageHeader(canvas: Canvas, data: LoanScheduleExportData): Float {
         val banner = fillPaint(emerald)
-        canvas.drawRect(0f, 0f, PAGE_WIDTH.toFloat(), 58f, banner)
+        canvas.drawRect(0f, 0f, LoanSchedulePdfLayout.PAGE_WIDTH.toFloat(), 58f, banner)
         canvas.drawText("PaisaCalc", LEFT, 37f, textPaint(20f, white, bold = true))
         canvas.drawText(data.title, LEFT, 86f, textPaint(17f, darkInk, bold = true))
         canvas.drawText(data.period, LEFT, 104f, textPaint(10f, mutedInk))
 
-        val metricsTop = 127f
+        val metricsTop = LoanSchedulePdfLayout.FIRST_PAGE_METRICS_TOP
         val metricRows = (data.metrics.size + 1) / 2
         val halfWidth = (RIGHT - LEFT) / 2f
         data.metrics.forEachIndexed { index, metric ->
             val column = index % 2
             val row = index / 2
             val x = LEFT + column * halfWidth
-            val top = metricsTop + row * 32f
+            val top = metricsTop + row * LoanSchedulePdfLayout.METRIC_ROW_HEIGHT
             canvas.drawText(metric.label, x, top, textPaint(8.5f, mutedInk))
             canvas.drawText(metric.value, x, top + 13f, textPaint(10f, darkInk, bold = true))
         }
-        return metricsTop + metricRows * 32f + 15f
+        return metricsTop + metricRows * LoanSchedulePdfLayout.METRIC_ROW_HEIGHT +
+            LoanSchedulePdfLayout.FIRST_PAGE_METRICS_PADDING
     }
 
     private fun drawContinuationHeader(canvas: Canvas): Float {
-        canvas.drawRect(0f, 0f, PAGE_WIDTH.toFloat(), 48f, fillPaint(emerald))
+        canvas.drawRect(0f, 0f, LoanSchedulePdfLayout.PAGE_WIDTH.toFloat(), 48f, fillPaint(emerald))
         canvas.drawText("PaisaCalc · Loan schedule (continued)", LEFT, 31f, textPaint(14f, white, bold = true))
-        return 69f
+        return LoanSchedulePdfLayout.CONTINUATION_TABLE_TOP
     }
 
     private fun drawTableHeader(canvas: Canvas, top: Float) {
@@ -114,15 +115,21 @@ object LoanSchedulePdfRenderer {
     }
 
     private fun drawFooter(canvas: Canvas, pageNumber: Int) {
-        canvas.drawLine(LEFT, FOOTER_TOP, RIGHT, FOOTER_TOP, strokePaint(divider, 0.7f))
+        canvas.drawLine(
+            LEFT,
+            LoanSchedulePdfLayout.FOOTER_TOP,
+            RIGHT,
+            LoanSchedulePdfLayout.FOOTER_TOP,
+            strokePaint(divider, 0.7f),
+        )
         canvas.drawText(
             "Estimates only · lender rounding may differ",
             LEFT,
-            FOOTER_TOP + 16f,
+            LoanSchedulePdfLayout.FOOTER_TOP + 16f,
             textPaint(8f, mutedInk),
         )
         val page = textPaint(8f, mutedInk).apply { textAlign = Paint.Align.RIGHT }
-        canvas.drawText("Page $pageNumber", RIGHT, FOOTER_TOP + 16f, page)
+        canvas.drawText("Page $pageNumber", RIGHT, LoanSchedulePdfLayout.FOOTER_TOP + 16f, page)
     }
 
     private fun fillPaint(color: Int) = Paint(Paint.ANTI_ALIAS_FLAG).apply {

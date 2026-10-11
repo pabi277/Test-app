@@ -57,10 +57,10 @@ in protected Actions secrets, not in this repository. See
 ## Permissions and data
 
 PaisaCalc requests no location, contacts, phone, or internet permission. PDFs
-are saved through Android's Storage Access Framework document picker; PNG
-schedules are shared from a private cache URI through the Android sharesheet.
-No broad storage permission is requested. Loan and GST history is stored
-locally in the app's private database; Android cloud and device-transfer
+can be saved through Android's Storage Access Framework document picker or
+shared alongside PNG schedules from private cache URIs through the Android
+sharesheet. No broad storage permission is requested. Loan and GST history is
+stored locally in the app's private database; Android cloud and device-transfer
 backup are disabled for the app data.
 
 ## License and credits

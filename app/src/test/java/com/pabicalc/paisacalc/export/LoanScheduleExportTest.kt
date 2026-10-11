@@ -39,15 +39,22 @@ class LoanScheduleExportTest {
     }
 
     @Test
-    fun pdfRendererWritesAValidPdfWithTheCompleteSchedule() {
-        val summary = prepaymentSummary()
-        val output = ByteArrayOutputStream()
+    fun pdfLayoutPaginatesEveryInstallmentAndKeepsPrepaymentRows() {
+        val data = LoanScheduleExportData.from(prepaymentSummary())
+        val rows = List(120) { data.rows[it % data.rows.size] }
+        val pages = LoanSchedulePdfLayout.paginate(data.copy(rows = rows))
 
-        LoanSchedulePdfRenderer.write(summary, output)
-
-        val bytes = output.toByteArray()
-        assertTrue(bytes.size > 1_000)
-        assertArrayEquals("%PDF-".toByteArray(Charsets.US_ASCII), bytes.copyOfRange(0, 5))
+        assertTrue(pages.size > 1)
+        assertEquals(rows, pages.flatMap { it.rows })
+        assertTrue(pages.flatMap { it.rows }.any { it.hasPrepayment })
+        var expectedFirstRowIndex = 0
+        pages.forEachIndexed { index, page ->
+            assertEquals(index + 1, page.number)
+            assertEquals(expectedFirstRowIndex, page.firstRowIndex)
+            assertTrue(page.rows.isNotEmpty())
+            expectedFirstRowIndex += page.rows.size
+        }
+        assertEquals(rows.size, expectedFirstRowIndex)
     }
 
     @Test
