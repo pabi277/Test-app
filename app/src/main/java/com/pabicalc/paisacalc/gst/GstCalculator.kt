@@ -40,6 +40,8 @@ data class GstCalculation(
 /** Pure, exact GST add/remove math. No Android dependencies. */
 object GstCalculator {
 
+    private const val PAISE_PER_RUPEE = 100L
+
     /** 100 crore, shared with the loan engine's user-facing amount cap. */
     const val MAX_AMOUNT_RUPEES = 1_000_000_000L
     const val MAX_AMOUNT_PAISE = MAX_AMOUNT_RUPEES * PAISE_PER_RUPEE
@@ -47,7 +49,6 @@ object GstCalculator {
     /** Custom rates are capped at 100% to keep the field useful and bounded. */
     const val MAX_RATE_MICRO_PERCENT = 100_000_000L
 
-    private const val PAISE_PER_RUPEE = 100L
     private const val MICRO_PERCENT_DENOMINATOR = 100_000_000L
     private val RATE_DENOMINATOR = BigInteger.valueOf(MICRO_PERCENT_DENOMINATOR)
     private val ONE = BigInteger.ONE
