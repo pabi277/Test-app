@@ -51,6 +51,7 @@
     <string name="schedule_emi_label">EMI %1$s per month</string>
     <string name="schedule_amounts_note">Amounts in ₹</string>
     <string name="schedule_header_month">Month</string>
+    <string name="schedule_header_emi">EMI</string>
     <string name="schedule_header_principal">Principal</string>
     <string name="schedule_header_interest">Interest</string>
     <string name="schedule_header_balance">Balance</string>
@@ -151,4 +152,23 @@
     <string name="tab_gst">GST</string>
     <string name="action_theme_light">Light</string>
     <string name="action_theme_dark">Dark</string>
+
+    <!-- Phase 4: export, accessibility and responsive polish -->
+    <string name="action_more_options">More options</string>
+    <string name="export_card_title">Export this schedule</string>
+    <string name="export_card_subtitle">Includes all %1$d installments and any prepayments.</string>
+    <string name="export_save_pdf">Save PDF</string>
+    <string name="export_share_pdf">Share PDF</string>
+    <string name="export_share_image">Share image</string>
+    <string name="export_pdf_saved">PDF schedule saved.</string>
+    <string name="export_failed">Could not export this schedule. Please try again.</string>
+    <string name="export_chooser_title">Share loan schedule</string>
+    <string name="slider_loan_amount_description">Loan amount slider</string>
+    <string name="slider_interest_rate_description">Annual interest rate slider</string>
+    <string name="slider_tenure_description">Loan tenure slider</string>
+    <string name="schedule_row_accessibility">Installment %1$d, %2$s. EMI %3$s. Principal %4$s. Interest %5$s. Prepayment %6$s. Closing balance %7$s.</string>
+    <string name="schedule_no_prepayment">none</string>
+    <string name="load_saved_loan_accessibility">Load saved loan %1$s</string>
+    <string name="remove_saved_loan_accessibility">Remove saved loan %1$s</string>
+    <string name="remove_gst_history_accessibility">Remove GST calculation for %1$s at %2$s percent</string>
 </resources>

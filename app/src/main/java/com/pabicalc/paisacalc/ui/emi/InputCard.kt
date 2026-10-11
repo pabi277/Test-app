@@ -22,6 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pabicalc.paisacalc.R
@@ -67,6 +71,18 @@ fun InputCard(
     val amount = IndianNumberFormat.parseGrouped(input.amountText)
     val rateMicroPercent = EmiInputParser.rateMicroPercent(input.rateText)
     val tenureValue = input.tenureText.toLongOrNull()
+    val amountSliderLabel = stringResource(R.string.slider_loan_amount_description)
+    val rateSliderLabel = stringResource(R.string.slider_interest_rate_description)
+    val tenureSliderLabel = stringResource(R.string.slider_tenure_description)
+    val amountSliderState = IndianNumberFormat.rupees(amount ?: AMOUNT_SLIDER_MIN)
+    val rateSliderState = DisplayFormatters.rateLabel(
+        rateMicroPercent ?: (DEFAULT_RATE_PERCENT * 1_000_000f).toLong(),
+    )
+    val tenureSliderState = if (input.tenureUnit == TenureUnit.YEARS) {
+        "${tenureValue ?: DEFAULT_TENURE_YEARS.toLong()} years"
+    } else {
+        "${tenureValue ?: DEFAULT_TENURE_YEARS * 12L} months"
+    }
 
     SectionCard(modifier = modifier) {
         Text(
@@ -97,6 +113,10 @@ fun InputCard(
             onValueChange = { onInputChange(input.copy(amountText = it.toLong().toString())) },
             valueRange = AMOUNT_SLIDER_MIN.toFloat()..AMOUNT_SLIDER_MAX.toFloat(),
             steps = AMOUNT_SLIDER_STEPS,
+            modifier = Modifier.semantics {
+                contentDescription = amountSliderLabel
+                stateDescription = amountSliderState
+            },
         )
         SliderEnds(
             startText = IndianNumberFormat.compactRupees(AMOUNT_SLIDER_MIN),
@@ -142,6 +162,10 @@ fun InputCard(
             },
             valueRange = RATE_SLIDER_MIN..RATE_SLIDER_MAX,
             steps = RATE_SLIDER_STEPS,
+            modifier = Modifier.semantics {
+                contentDescription = rateSliderLabel
+                stateDescription = rateSliderState
+            },
         )
         SliderEnds(
             startText = DisplayFormatters.rateLabel((RATE_SLIDER_MIN * 1_000_000).toLong()),
@@ -192,6 +216,10 @@ fun InputCard(
             onValueChange = { onInputChange(withTenureYears(input, it.roundToInt())) },
             valueRange = TENURE_SLIDER_MIN_YEARS.toFloat()..TENURE_SLIDER_MAX_YEARS.toFloat(),
             steps = TENURE_SLIDER_STEPS,
+            modifier = Modifier.semantics {
+                contentDescription = tenureSliderLabel
+                stateDescription = tenureSliderState
+            },
         )
         SliderEnds(
             startText = "$TENURE_SLIDER_MIN_YEARS yr",
@@ -263,6 +291,7 @@ fun PrivacyPill(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = "●",
+                modifier = Modifier.clearAndSetSemantics { },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
             )

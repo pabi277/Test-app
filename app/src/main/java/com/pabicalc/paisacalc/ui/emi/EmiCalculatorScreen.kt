@@ -1,15 +1,26 @@
 package com.pabicalc.paisacalc.ui.emi
 
+import android.content.ClipData
+import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -29,8 +40,12 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.pabicalc.paisacalc.R
 import com.pabicalc.paisacalc.data.PaisaRepository
@@ -41,7 +56,12 @@ import com.pabicalc.paisacalc.engine.LoanSummary
 import com.pabicalc.paisacalc.engine.PrepaymentFrequency
 import com.pabicalc.paisacalc.engine.PrepaymentPlan
 import com.pabicalc.paisacalc.engine.PrepaymentStrategy
+import com.pabicalc.paisacalc.export.LoanScheduleImageRenderer
+import com.pabicalc.paisacalc.export.LoanSchedulePdfRenderer
 import com.pabicalc.paisacalc.format.IndianNumberFormat
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,6 +69,41 @@ import kotlinx.coroutines.withContext
 
 /** Typing pause before recalculating: keeps slider drags and typing smooth. */
 private const val RECALCULATION_DEBOUNCE_MS = 120L
+
+private suspend fun writeCachedExport(
+    context: Context,
+    extension: String,
+    render: (OutputStream) -> Unit,
+): File = withContext(Dispatchers.IO) {
+    val directory = File(context.cacheDir, "exports")
+    check(directory.isDirectory || directory.mkdirs()) { "Could not create export cache" }
+    val file = File.createTempFile("loan-schedule-", ".$extension", directory)
+    FileOutputStream(file).use { output -> render(output) }
+    file
+}
+
+private fun shareCachedExport(
+    context: Context,
+    file: File,
+    mimeType: String,
+    chooserTitle: String,
+) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file,
+    )
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = mimeType
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newUri(context.contentResolver, chooserTitle, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(
+        Intent.createChooser(sendIntent, chooserTitle)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
+    )
+}
 
 /**
  * The prepayment editor survives rotation the same way the loan fields do:
@@ -95,6 +150,7 @@ fun EmiCalculatorScreen(
     onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var moreActionsExpanded by remember { mutableStateOf(false) }
     var amountText by rememberSaveable { mutableStateOf("") }
     var rateText by rememberSaveable { mutableStateOf("") }
     var tenureText by rememberSaveable { mutableStateOf("") }
@@ -123,6 +179,58 @@ fun EmiCalculatorScreen(
     val loadedMessage = stringResource(R.string.saved_loan_loaded)
     val deletedMessage = stringResource(R.string.saved_loan_removed)
     val storageErrorMessage = stringResource(R.string.local_storage_error)
+    val pdfSavedMessage = stringResource(R.string.export_pdf_saved)
+    val exportErrorMessage = stringResource(R.string.export_failed)
+    val shareChooserTitle = stringResource(R.string.export_chooser_title)
+    val moreOptionsDescription = stringResource(R.string.action_more_options)
+    val context = LocalContext.current
+    var pendingPdfSummary by remember { mutableStateOf<LoanSummary?>(null) }
+    val pdfExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf"),
+    ) { uri ->
+        val summaryToExport = pendingPdfSummary
+        pendingPdfSummary = null
+        if (uri != null && summaryToExport != null) {
+            coroutineScope.launch {
+                val saved = runCatching {
+                    withContext(Dispatchers.IO) {
+                        val output = context.contentResolver.openOutputStream(uri)
+                            ?: error("The document provider did not open the PDF output stream")
+                        output.use { LoanSchedulePdfRenderer.write(summaryToExport, it) }
+                    }
+                }
+                snackbarHostState.showSnackbar(
+                    if (saved.isSuccess) pdfSavedMessage else exportErrorMessage,
+                )
+            }
+        }
+    }
+    val shareScheduleImage: (LoanSummary) -> Unit = { summaryToExport ->
+        coroutineScope.launch {
+            try {
+                val imageFile = writeCachedExport(context, "png") { output ->
+                    LoanScheduleImageRenderer.writePng(summaryToExport, output)
+                }
+                shareCachedExport(context, imageFile, "image/png", shareChooserTitle)
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                snackbarHostState.showSnackbar(exportErrorMessage)
+            }
+        }
+    }
+    val shareSchedulePdf: (LoanSummary) -> Unit = { summaryToExport ->
+        coroutineScope.launch {
+            try {
+                val pdfFile = writeCachedExport(context, "pdf") { output ->
+                    LoanSchedulePdfRenderer.write(summaryToExport, output)
+                }
+                shareCachedExport(context, pdfFile, "application/pdf", shareChooserTitle)
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                snackbarHostState.showSnackbar(exportErrorMessage)
+            }
+        }
+    }
     val validTerms = (parsedLoan as? EmiParseResult.Valid)?.terms
     val generatedTitle = if (validTerms != null) {
         stringResource(
@@ -243,22 +351,45 @@ fun EmiCalculatorScreen(
                     ) {
                         Text(stringResource(R.string.action_example))
                     }
-                    TextButton(
-                        onClick = {
-                            amountText = ""
-                            rateText = ""
-                            tenureText = ""
-                            prepaymentInput = PrepaymentInput()
-                        },
-                    ) {
-                        Text(stringResource(R.string.action_reset))
-                    }
-                    TextButton(onClick = onToggleTheme) {
-                        Text(
-                            stringResource(
-                                if (isDarkTheme) R.string.action_theme_light else R.string.action_theme_dark,
-                            ),
-                        )
+                    Box {
+                        IconButton(onClick = { moreActionsExpanded = true }) {
+                            Text(
+                                text = "⋮",
+                                modifier = Modifier.semantics {
+                                    contentDescription = moreOptionsDescription
+                                },
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = moreActionsExpanded,
+                            onDismissRequest = { moreActionsExpanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_reset)) },
+                                onClick = {
+                                    amountText = ""
+                                    rateText = ""
+                                    tenureText = ""
+                                    prepaymentInput = PrepaymentInput()
+                                    moreActionsExpanded = false
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        stringResource(
+                                            if (isDarkTheme) R.string.action_theme_light else R.string.action_theme_dark,
+                                        ),
+                                    )
+                                },
+                                onClick = {
+                                    moreActionsExpanded = false
+                                    onToggleTheme()
+                                },
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -269,76 +400,94 @@ fun EmiCalculatorScreen(
             )
         },
     ) { insets ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
-                .consumeWindowInsets(insets)
-                .imePadding(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .consumeWindowInsets(insets),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            item { PrivacyPill() }
+            LazyColumn(
+                modifier = Modifier
+                    .widthIn(max = 720.dp)
+                    .fillMaxSize()
+                    .imePadding(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item { PrivacyPill() }
 
-            item {
-                InputCard(
-                    input = input,
-                    issues = state.issuesByField().values.toList(),
-                    onInputChange = { updated ->
-                        amountText = updated.amountText
-                        rateText = updated.rateText
-                        tenureText = updated.tenureText
-                        tenureUnit = updated.tenureUnit
-                    },
-                )
-            }
-
-            item {
-                SavedLoansCard(
-                    loans = savedLoans,
-                    canSave = canSave,
-                    onSave = saveCurrentLoan,
-                    onLoad = loadSavedLoan,
-                    onDelete = deleteSavedLoan,
-                )
-            }
-
-            val tenureMonths = (parsedLoan as? EmiParseResult.Valid)?.terms?.tenureMonths
-                ?: lastSummary?.terms?.tenureMonths
-            item {
-                PrepaymentCard(
-                    input = prepaymentInput,
-                    issues = (prepaymentParse as? PrepaymentParseResult.Invalid)?.issues.orEmpty(),
-                    startMonth = startMonth,
-                    tenureMonths = tenureMonths,
-                    onInputChange = { prepaymentInput = it },
-                )
-            }
-
-            val loadingSummary = if (state is EmiUiState.Loading) lastSummary else null
-            item { ResultSection(state = state, previousSummary = loadingSummary) }
-
-            val summary = (state as? EmiUiState.Ready)?.summary ?: loadingSummary
-            if (summary != null) {
-                if (summary.hasPrepayments) {
-                    item { PrepaymentSavedCallout(summary = summary) }
+                item {
+                    InputCard(
+                        input = input,
+                        issues = state.issuesByField().values.toList(),
+                        onInputChange = { updated ->
+                            amountText = updated.amountText
+                            rateText = updated.rateText
+                            tenureText = updated.tenureText
+                            tenureUnit = updated.tenureUnit
+                        },
+                    )
                 }
-                item { BreakdownCard(summary = summary) }
-                item { ScheduleHeaderCard(summary = summary) }
 
-                // Derived per recomposition: chunking at most 480 rows is free.
-                val years = ScheduleGrouper.byLoanYear(summary)
-                years.forEach { year ->
-                    item(key = "year-${year.index}") { ScheduleYearHeader(year = year) }
-                    items(items = year.installments, key = { it.number }) { installment ->
-                        ScheduleRow(installment = installment)
+                item {
+                    SavedLoansCard(
+                        loans = savedLoans,
+                        canSave = canSave,
+                        onSave = saveCurrentLoan,
+                        onLoad = loadSavedLoan,
+                        onDelete = deleteSavedLoan,
+                    )
+                }
+
+                val tenureMonths = (parsedLoan as? EmiParseResult.Valid)?.terms?.tenureMonths
+                    ?: lastSummary?.terms?.tenureMonths
+                item {
+                    PrepaymentCard(
+                        input = prepaymentInput,
+                        issues = (prepaymentParse as? PrepaymentParseResult.Invalid)?.issues.orEmpty(),
+                        startMonth = startMonth,
+                        tenureMonths = tenureMonths,
+                        onInputChange = { prepaymentInput = it },
+                    )
+                }
+
+                val loadingSummary = if (state is EmiUiState.Loading) lastSummary else null
+                item { ResultSection(state = state, previousSummary = loadingSummary) }
+
+                val summary = (state as? EmiUiState.Ready)?.summary ?: loadingSummary
+                if (summary != null) {
+                    if (summary.hasPrepayments) {
+                        item { PrepaymentSavedCallout(summary = summary) }
                     }
-                }
+                    item {
+                        ExportActionsCard(
+                            summary = summary,
+                            onSavePdf = {
+                                pendingPdfSummary = summary
+                                pdfExportLauncher.launch("PaisaCalc-loan-schedule.pdf")
+                            },
+                            onSharePdf = { shareSchedulePdf(summary) },
+                            onShareImage = { shareScheduleImage(summary) },
+                        )
+                    }
+                    item { BreakdownCard(summary = summary) }
+                    item { ScheduleHeaderCard(summary = summary) }
 
-                if (summary.hasAdjustedFinalInstallment) {
-                    item { FinalInstallmentNote(summary = summary) }
+                    // Derived per recomposition: chunking at most 480 rows is free.
+                    val years = ScheduleGrouper.byLoanYear(summary)
+                    years.forEach { year ->
+                        item(key = "year-${year.index}") { ScheduleYearHeader(year = year) }
+                        items(items = year.installments, key = { it.number }) { installment ->
+                            ScheduleRow(installment = installment)
+                        }
+                    }
+
+                    if (summary.hasAdjustedFinalInstallment) {
+                        item { FinalInstallmentNote(summary = summary) }
+                    }
+                    item { ScheduleEstimateNote() }
                 }
-                item { ScheduleEstimateNote() }
             }
         }
     }

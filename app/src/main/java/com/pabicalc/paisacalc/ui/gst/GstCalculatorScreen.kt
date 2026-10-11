@@ -4,6 +4,7 @@ package com.pabicalc.paisacalc.ui.gst
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pabicalc.paisacalc.R
@@ -165,46 +169,53 @@ fun GstCalculatorScreen(
             )
         },
     ) { insets ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
-                .consumeWindowInsets(insets)
-                .imePadding(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .consumeWindowInsets(insets),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            item { PrivacyPill() }
-            item {
-                GstInputCard(
-                    amountText = amountText,
-                    mode = mode,
-                    supplyType = supplyType,
-                    catalog = catalog,
-                    selectedRateId = effectiveRateId,
-                    customRateText = customRateText,
-                    parseResult = parsed,
-                    onAmountChange = { amountText = GstInputSanitizer.amount(it) },
-                    onModeChange = { mode = it },
-                    onSupplyTypeChange = { supplyType = it },
-                    onPresetSelected = { selectedRateId = it },
-                    onCustomSelected = { selectedRateId = null },
-                    onCustomRateChange = { customRateText = GstInputSanitizer.rate(it) },
-                )
-            }
-            if (calculation != null) {
+            LazyColumn(
+                modifier = Modifier
+                    .widthIn(max = 720.dp)
+                    .fillMaxSize()
+                    .imePadding(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item { PrivacyPill() }
                 item {
-                    GstResultCard(
-                        calculation = calculation,
-                        onSave = { saveCalculation(calculation) },
+                    GstInputCard(
+                        amountText = amountText,
+                        mode = mode,
+                        supplyType = supplyType,
+                        catalog = catalog,
+                        selectedRateId = effectiveRateId,
+                        customRateText = customRateText,
+                        parseResult = parsed,
+                        onAmountChange = { amountText = GstInputSanitizer.amount(it) },
+                        onModeChange = { mode = it },
+                        onSupplyTypeChange = { supplyType = it },
+                        onPresetSelected = { selectedRateId = it },
+                        onCustomSelected = { selectedRateId = null },
+                        onCustomRateChange = { customRateText = GstInputSanitizer.rate(it) },
                     )
                 }
-            }
-            item {
-                GstHistoryCard(
-                    history = history,
-                    onDelete = deleteHistory,
-                )
+                if (calculation != null) {
+                    item {
+                        GstResultCard(
+                            calculation = calculation,
+                            onSave = { saveCalculation(calculation) },
+                        )
+                    }
+                }
+                item {
+                    GstHistoryCard(
+                        history = history,
+                        onDelete = deleteHistory,
+                    )
+                }
             }
         }
     }
@@ -507,10 +518,16 @@ private fun GstHistoryCard(
                     GstCalculationMode.ADD.name -> stringResource(R.string.gst_add_mode)
                     else -> stringResource(R.string.gst_remove_mode)
                 }
+                val historyRateText = GstCalculator.rateText(row.rateMicroPercent)
                 val title = stringResource(
                     R.string.gst_history_item_title,
                     mode,
-                    GstCalculator.rateText(row.rateMicroPercent),
+                    historyRateText,
+                )
+                val removeDescription = stringResource(
+                    R.string.remove_gst_history_accessibility,
+                    mode,
+                    historyRateText,
                 )
                 val detail = stringResource(
                     R.string.gst_history_item_detail,
@@ -550,7 +567,10 @@ private fun GstHistoryCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    TextButton(onClick = { onDelete(row.id) }) {
+                    TextButton(
+                        onClick = { onDelete(row.id) },
+                        modifier = Modifier.semantics { contentDescription = removeDescription },
+                    ) {
                         Text(stringResource(R.string.action_remove))
                     }
                 }

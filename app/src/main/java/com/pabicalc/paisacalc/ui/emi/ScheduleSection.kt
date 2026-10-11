@@ -4,6 +4,7 @@ package com.pabicalc.paisacalc.ui.emi
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,9 +17,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,6 +32,7 @@ import com.pabicalc.paisacalc.engine.LoanSummary
 import com.pabicalc.paisacalc.format.IndianNumberFormat
 
 private val MONTH_COLUMN_WIDTH = 52.dp
+private val COMPACT_SCHEDULE_WIDTH = 400.dp
 private const val PRINCIPAL_WEIGHT = 1.05f
 private const val INTEREST_WEIGHT = 1.05f
 private const val BALANCE_WEIGHT = 1.3f
@@ -77,24 +82,56 @@ fun ScheduleHeaderCard(summary: LoanSummary, modifier: Modifier = Modifier) {
             )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        Row(modifier = Modifier.fillMaxWidth()) {
-            HeaderCell(
-                text = stringResource(R.string.schedule_header_month),
-                modifier = Modifier.width(MONTH_COLUMN_WIDTH),
-                alignment = TextAlign.Start,
-            )
-            HeaderCell(
-                text = stringResource(R.string.schedule_header_principal),
-                modifier = Modifier.weight(PRINCIPAL_WEIGHT),
-            )
-            HeaderCell(
-                text = stringResource(R.string.schedule_header_interest),
-                modifier = Modifier.weight(INTEREST_WEIGHT),
-            )
-            HeaderCell(
-                text = stringResource(R.string.schedule_header_balance),
-                modifier = Modifier.weight(BALANCE_WEIGHT),
-            )
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            if (maxWidth < COMPACT_SCHEDULE_WIDTH) {
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        HeaderCell(
+                            text = stringResource(R.string.schedule_header_month),
+                            modifier = Modifier.weight(1f),
+                            alignment = TextAlign.Start,
+                        )
+                        HeaderCell(
+                            text = stringResource(R.string.schedule_header_emi),
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        HeaderCell(
+                            text = stringResource(R.string.schedule_header_principal),
+                            modifier = Modifier.weight(1f),
+                        )
+                        HeaderCell(
+                            text = stringResource(R.string.schedule_header_interest),
+                            modifier = Modifier.weight(1f),
+                        )
+                        HeaderCell(
+                            text = stringResource(R.string.schedule_header_balance),
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            } else {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    HeaderCell(
+                        text = stringResource(R.string.schedule_header_month),
+                        modifier = Modifier.width(MONTH_COLUMN_WIDTH),
+                        alignment = TextAlign.Start,
+                    )
+                    HeaderCell(
+                        text = stringResource(R.string.schedule_header_principal),
+                        modifier = Modifier.weight(PRINCIPAL_WEIGHT),
+                    )
+                    HeaderCell(
+                        text = stringResource(R.string.schedule_header_interest),
+                        modifier = Modifier.weight(INTEREST_WEIGHT),
+                    )
+                    HeaderCell(
+                        text = stringResource(R.string.schedule_header_balance),
+                        modifier = Modifier.weight(BALANCE_WEIGHT),
+                    )
+                }
+            }
         }
     }
 }
@@ -136,31 +173,130 @@ fun ScheduleYearHeader(year: ScheduleYear, modifier: Modifier = Modifier) {
 /** One installment row: month, then the principal/interest/balance columns. */
 @Composable
 fun ScheduleRow(installment: Installment, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        InstallmentColumns(installment)
-        if (installment.prepaymentComponent > 0L) {
-            Row(
+    val prepaymentDescription = if (installment.prepaymentComponent > 0L) {
+        IndianNumberFormat.rupees(installment.prepaymentComponent)
+    } else {
+        stringResource(R.string.schedule_no_prepayment)
+    }
+    val rowDescription = stringResource(
+        R.string.schedule_row_accessibility,
+        installment.number,
+        installment.month.longLabel(),
+        IndianNumberFormat.rupees(installment.amountPaid),
+        IndianNumberFormat.rupees(installment.principalComponent),
+        IndianNumberFormat.rupees(installment.interestComponent),
+        prepaymentDescription,
+        IndianNumberFormat.rupees(installment.closingBalance),
+    )
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        if (maxWidth < COMPACT_SCHEDULE_WIDTH) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp, bottom = 4.dp),
-                horizontalArrangement = Arrangement.End,
+                    .semantics(mergeDescendants = true) { contentDescription = rowDescription }
+                    .padding(vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                Text(
-                    text = stringResource(
-                        R.string.prepayment_row_label,
-                        IndianNumberFormat.group(installment.prepaymentComponent),
-                    ),
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(50),
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = installment.month.shortLabel(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "${stringResource(R.string.schedule_header_emi)} ${IndianNumberFormat.rupees(installment.amountPaid)}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CompactScheduleValue(
+                        label = stringResource(R.string.schedule_header_principal),
+                        value = IndianNumberFormat.rupees(installment.principalComponent),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    CompactScheduleValue(
+                        label = stringResource(R.string.schedule_header_interest),
+                        value = IndianNumberFormat.rupees(installment.interestComponent),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CompactScheduleValue(
+                        label = stringResource(R.string.schedule_header_balance),
+                        value = IndianNumberFormat.rupees(installment.closingBalance),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (installment.prepaymentComponent > 0L) {
+                        CompactScheduleValue(
+                            label = stringResource(R.string.prepayment_breakdown_total),
+                            value = IndianNumberFormat.rupees(installment.prepaymentComponent),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.weight(1f),
                         )
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                )
+                    }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) { contentDescription = rowDescription },
+            ) {
+                InstallmentColumns(installment)
+                if (installment.prepaymentComponent > 0L) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.prepayment_row_label,
+                                IndianNumberFormat.group(installment.prepaymentComponent),
+                            ),
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    shape = RoundedCornerShape(50),
+                                )
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun CompactScheduleValue(label: String, value: String, color: Color, modifier: Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelLarge,
+            color = color,
+            maxLines = 1,
+            softWrap = false,
+        )
     }
 }
 

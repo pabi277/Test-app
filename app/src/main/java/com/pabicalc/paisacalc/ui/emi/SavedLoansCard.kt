@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.pabicalc.paisacalc.R
 import com.pabicalc.paisacalc.data.SavedLoanEntity
@@ -62,6 +64,8 @@ fun SavedLoansCard(
             )
         } else {
             loans.forEach { loan ->
+                val loadDescription = stringResource(R.string.load_saved_loan_accessibility, loan.title)
+                val removeDescription = stringResource(R.string.remove_saved_loan_accessibility, loan.title)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -86,10 +90,16 @@ fun SavedLoansCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    TextButton(onClick = { onLoad(loan) }) {
+                    TextButton(
+                        onClick = { onLoad(loan) },
+                        modifier = Modifier.semantics { contentDescription = loadDescription },
+                    ) {
                         Text(stringResource(R.string.action_load))
                     }
-                    TextButton(onClick = { pendingDelete = loan }) {
+                    TextButton(
+                        onClick = { pendingDelete = loan },
+                        modifier = Modifier.semantics { contentDescription = removeDescription },
+                    ) {
                         Text(stringResource(R.string.action_remove))
                     }
                 }

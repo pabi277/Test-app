@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
  * Light and dark schemes share one entry point; the selected mode is saved
  * locally by the app and never requires a network request.
  */
-private val LightColors = lightColorScheme(
+internal val LightColors = lightColorScheme(
     primary = Color(0xFF0B6E4F),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFD3F0E1),
@@ -49,7 +49,7 @@ private val LightColors = lightColorScheme(
     onErrorContainer = Color(0xFF410002),
 )
 
-private val DarkColors = darkColorScheme(
+internal val DarkColors = darkColorScheme(
     primary = Color(0xFF8ED5B5),
     onPrimary = Color(0xFF00382B),
     primaryContainer = Color(0xFF00513B),
@@ -96,7 +96,7 @@ private val PaisaCalcTypography = Typography(
         letterSpacing = 0.1.sp,
     ),
     bodyMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-    bodySmall = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+    bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
     labelLarge = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
@@ -111,9 +111,9 @@ private val PaisaCalcTypography = Typography(
     ),
     labelSmall = TextStyle(
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 14.sp,
-        letterSpacing = 0.4.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.2.sp,
     ),
 )
 
