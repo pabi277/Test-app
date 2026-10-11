@@ -68,6 +68,10 @@
   loans/GST history Room store (offline, no permissions), 3.2 GST add/remove
   calculator (CGST/SGST vs IGST, dated slab asset + custom rate, CBIC
   disclaimer), 3.3 tabbed navigation (EMI · GST) + dark/light theme
+- Owner action: add the four `ANDROID_KEYSTORE_*` Actions secrets — the
+  main-only signed-release job fails without them (`Missing required Actions
+  secret: ANDROID_KEYSTORE_BASE64`, first seen on the PR #1 merge run
+  38123662318); the unit-test/`app-progress-apk` job is green regardless
 - Open risks / owner items: complete the on-device ten-1-star audit before
   submission · owner verifies GST slab asset against CBIC portal (law 14) ·
   Play account + closed-test (≥12 testers/14 days) readiness check

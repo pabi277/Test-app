@@ -23,6 +23,12 @@
   record — all authored `pabi277 <pabitra27.7.06@gmail.com>` (repo-local git
   config, verified with `git var`).
 
+- Final branch run:
+  [38125781632](https://github.com/pabi277/Test-app/actions/runs/38125781632)
+  green (tip sha `da29854`) with `app-progress-apk` 10,365,093 bytes
+- Merge to `main`: owner command in chat (2026-10-11) — PR #2
+  (`arena/3443f676-test-app` → `main`)
+
 ## Parts
 
 - 2.1 — Prepayment model: monthly / quarterly / half-yearly / yearly /

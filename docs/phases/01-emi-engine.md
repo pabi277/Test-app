@@ -13,6 +13,9 @@
   donut, total interest/payable, and the full amortization schedule with
   mmm-yy month labels and year blocks — all calculated on-device, offline.*
 
+- Merge to `main`: owner command in chat (2026-10-11) — PR #2
+  (`arena/3443f676-test-app` → `main`, together with phase 2)
+
 ## Parts
 
 - 1.1 — Pure-Kotlin reducing-balance amortization engine — ✅
