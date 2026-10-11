@@ -210,6 +210,16 @@ fun BreakdownCard(summary: LoanSummary, modifier: Modifier = Modifier) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         SummaryRow(stringResource(R.string.summary_loan_amount), IndianNumberFormat.rupees(summary.principal))
         SummaryRow(stringResource(R.string.summary_total_interest), IndianNumberFormat.rupees(summary.totalInterest))
+        if (summary.hasPrepayments) {
+            SummaryRow(
+                stringResource(R.string.prepayment_breakdown_total),
+                IndianNumberFormat.rupees(summary.totalPrepaid),
+            )
+            SummaryRow(
+                stringResource(R.string.prepayment_breakdown_saved),
+                IndianNumberFormat.rupees(summary.interestSaved),
+            )
+        }
         SummaryRow(
             label = stringResource(R.string.summary_total_payable),
             value = IndianNumberFormat.rupees(summary.totalPayable),

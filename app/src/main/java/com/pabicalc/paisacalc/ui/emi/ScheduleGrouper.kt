@@ -14,6 +14,8 @@ data class ScheduleYear(
     val lastMonth: LoanMonth,
     val totalPrincipal: Long,
     val totalInterest: Long,
+    /** Prepayments made inside this block; zero for a plain loan. */
+    val totalPrepaid: Long,
     val installments: List<Installment>,
 )
 
@@ -31,6 +33,7 @@ object ScheduleGrouper {
                     lastMonth = chunk.last().month,
                     totalPrincipal = chunk.sumOf { it.principalComponent },
                     totalInterest = chunk.sumOf { it.interestComponent },
+                    totalPrepaid = chunk.sumOf { it.prepaymentComponent },
                     installments = chunk,
                 )
             }

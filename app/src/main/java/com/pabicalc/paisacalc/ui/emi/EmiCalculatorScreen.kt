@@ -20,6 +20,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,6 +32,9 @@ import com.pabicalc.paisacalc.R
 import com.pabicalc.paisacalc.engine.EmiEngine
 import com.pabicalc.paisacalc.engine.LoanMonth
 import com.pabicalc.paisacalc.engine.LoanSummary
+import com.pabicalc.paisacalc.engine.PrepaymentFrequency
+import com.pabicalc.paisacalc.engine.PrepaymentPlan
+import com.pabicalc.paisacalc.engine.PrepaymentStrategy
 import com.pabicalc.paisacalc.ui.theme.PaisaCalcTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -38,6 +43,43 @@ import kotlinx.coroutines.withContext
 /** Typing pause before recalculating: keeps slider drags and typing smooth. */
 private const val RECALCULATION_DEBOUNCE_MS = 120L
 
+/**
+ * The prepayment editor survives rotation the same way the loan fields do:
+ * save the raw text, rebuild the enums by name (tolerating a rename).
+ */
+private val PrepaymentInputSaver: Saver<PrepaymentInput, Any> = listSaver(
+    save = { input ->
+        listOf(input.amountText, input.fromInstallmentText, input.frequency.name, input.strategy.name)
+    },
+    restore = { saved ->
+        PrepaymentInput(
+            amountText = saved[0],
+            fromInstallmentText = saved[1],
+            frequency = PrepaymentFrequency.entries.firstOrNull { it.name == saved[2] }
+                ?: PrepaymentFrequency.QUARTERLY,
+            strategy = PrepaymentStrategy.entries.firstOrNull { it.name == saved[3] }
+                ?: PrepaymentStrategy.REDUCE_TENURE,
+        )
+    },
+)
+
+/**
+ * One tap to a complete, realistic scenario — the exact quarterly-prepayment
+ * flow the phase-2 research asked for (₹10,00,000 at 8.5% for 20 years, then
+ * ₹25,000 prepaid every quarter starting in year 2).
+ */
+private fun exampleInputs(): Pair<EmiInput, PrepaymentInput> = EmiInput(
+    amountText = "1000000",
+    rateText = "8.5",
+    tenureText = "20",
+    tenureUnit = TenureUnit.YEARS,
+) to PrepaymentInput(
+    amountText = "25000",
+    fromInstallmentText = "13",
+    frequency = PrepaymentFrequency.QUARTERLY,
+    strategy = PrepaymentStrategy.REDUCE_TENURE,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
@@ -45,6 +87,9 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
     var rateText by rememberSaveable { mutableStateOf("") }
     var tenureText by rememberSaveable { mutableStateOf("") }
     var tenureUnit by rememberSaveable { mutableStateOf(TenureUnit.YEARS) }
+    var prepaymentInput by rememberSaveable(stateSaver = PrepaymentInputSaver) {
+        mutableStateOf(PrepaymentInput())
+    }
     var state by remember { mutableStateOf<EmiUiState>(EmiUiState.Empty) }
     // The last completed result stays on screen while the next one is being
     // computed, so typing and slider drags never blank out the numbers.
@@ -57,17 +102,22 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
         tenureUnit = tenureUnit,
     )
     val startMonth = remember { LoanMonth.now() }
+    val parsedLoan = EmiInputParser.parse(input)
+    val prepaymentParse = PrepaymentInputParser.parse(prepaymentInput)
 
     // Parse -> Loading -> compute off the main thread -> Ready. Re-running on
     // every input change cancels the previous pass, so a stale result can
     // never overwrite a fresh one.
-    LaunchedEffect(input, startMonth) {
+    LaunchedEffect(input, prepaymentInput, startMonth) {
         when (val parsed = EmiInputParser.parse(input)) {
             is EmiParseResult.Valid -> {
                 state = EmiUiState.Loading
                 delay(RECALCULATION_DEBOUNCE_MS)
+                val plan = (PrepaymentInputParser.parse(prepaymentInput) as? PrepaymentParseResult.Active)
+                    ?.plan
+                    ?: PrepaymentPlan.NONE
                 val summary = withContext(Dispatchers.Default) {
-                    EmiEngine.calculate(parsed.terms, startMonth)
+                    EmiEngine.calculate(parsed.terms, startMonth, plan)
                 }
                 lastSummary = summary
                 state = EmiUiState.Ready(summary)
@@ -100,9 +150,22 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
                 actions = {
                     TextButton(
                         onClick = {
+                            val (exampleLoan, examplePrepayment) = exampleInputs()
+                            amountText = exampleLoan.amountText
+                            rateText = exampleLoan.rateText
+                            tenureText = exampleLoan.tenureText
+                            tenureUnit = exampleLoan.tenureUnit
+                            prepaymentInput = examplePrepayment
+                        },
+                    ) {
+                        Text(stringResource(R.string.action_example))
+                    }
+                    TextButton(
+                        onClick = {
                             amountText = ""
                             rateText = ""
                             tenureText = ""
+                            prepaymentInput = PrepaymentInput()
                         },
                     ) {
                         Text(stringResource(R.string.action_reset))
@@ -139,11 +202,26 @@ fun EmiCalculatorScreen(modifier: Modifier = Modifier) {
                 )
             }
 
+            val tenureMonths = (parsedLoan as? EmiParseResult.Valid)?.terms?.tenureMonths
+                ?: lastSummary?.terms?.tenureMonths
+            item {
+                PrepaymentCard(
+                    input = prepaymentInput,
+                    issues = (prepaymentParse as? PrepaymentParseResult.Invalid)?.issues.orEmpty(),
+                    startMonth = startMonth,
+                    tenureMonths = tenureMonths,
+                    onInputChange = { prepaymentInput = it },
+                )
+            }
+
             val loadingSummary = if (state is EmiUiState.Loading) lastSummary else null
             item { ResultSection(state = state, previousSummary = loadingSummary) }
 
             val summary = (state as? EmiUiState.Ready)?.summary ?: loadingSummary
             if (summary != null) {
+                if (summary.hasPrepayments) {
+                    item { PrepaymentSavedCallout(summary = summary) }
+                }
                 item { BreakdownCard(summary = summary) }
                 item { ScheduleHeaderCard(summary = summary) }
 

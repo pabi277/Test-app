@@ -3,6 +3,7 @@
     <string name="app_name">PaisaCalc</string>
     <string name="top_bar_subtitle">Offline EMI calculator</string>
     <string name="action_reset">Reset</string>
+    <string name="action_example">Example</string>
     <string name="privacy_pill">No internet needed · no data collected</string>
 
     <!-- Inputs -->
@@ -57,4 +58,31 @@
     <string name="schedule_year_totals">Principal %1$s · Interest %2$s</string>
     <string name="schedule_final_adjusted">The last installment is %1$s — adjusted so the loan closes at exactly zero.</string>
     <string name="schedule_estimate_note">Estimates. Bank schedules can differ by a rupee or two because of rounding.</string>
+    <string name="schedule_year_totals_prepaid">Principal %1$s · Interest %2$s · Prepaid %3$s</string>
+    <string name="schedule_emi_drops">EMI drops to %1$s after the prepayments.</string>
+
+    <!-- Prepayments -->
+    <string name="prepayment_card_title">Prepayments</string>
+    <string name="prepayment_card_subtitle">Paying extra cuts interest. Add an amount to see the new schedule.</string>
+    <string name="field_prepayment_amount_label">Prepayment amount</string>
+    <string name="prepayment_frequency_label">How often</string>
+    <string name="prepayment_strategy_label">Apply it by</string>
+    <string name="field_prepayment_from_label">Starting installment</string>
+    <string name="prepayment_from_caption">Installment %1$d of %2$d · %3$s</string>
+    <string name="prepayment_from_caption_short">Installment %1$d · %2$s</string>
+    <string name="prepayment_from_hint">Which installment the prepayment starts from.</string>
+    <string name="prepayment_strategy_shorten_hint">Same EMI, loan closes earlier — the biggest interest saving.</string>
+    <string name="prepayment_strategy_reduce_hint">Lower EMI, loan still ends on time.</string>
+    <string name="prepayment_never_applies">This loan has only %1$d installments, so a prepayment starting at installment %2$d never applies.</string>
+    <string name="prepayment_saved_title">You save %1$s in interest</string>
+    <string name="prepayment_no_interest_saved">A zero-interest loan has no interest to save</string>
+    <string name="prepayment_saved_shorter">The loan closes %1$s earlier — %2$d installments instead of %3$d.</string>
+    <string name="prepayment_saved_same_tenure">The EMI drops to %1$s and the loan still ends in %2$s.</string>
+    <string name="prepayment_total_row_value">Total prepaid %1$s across %2$d installments.</string>
+    <string name="prepayment_shorten_tip">Switching to the shorter-tenure option saves even more interest.</string>
+    <string name="prepayment_breakdown_total">Total prepaid</string>
+    <string name="prepayment_breakdown_saved">Interest saved</string>
+    <string name="prepayment_row_label">Prepaid %1$s</string>
+    <string name="issue_prepayment_amount_invalid">Enter a prepayment between ₹1 and ₹1,00,00,00,000.</string>
+    <string name="issue_prepayment_from_invalid">Starting installment must be between 1 and 480.</string>
 </resources>

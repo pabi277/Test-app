@@ -2,12 +2,15 @@
 
 package com.pabicalc.paisacalc.ui.emi
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +66,16 @@ fun ScheduleHeaderCard(summary: LoanSummary, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        if (summary.finalMonthlyEmi != summary.monthlyEmi) {
+            Text(
+                text = stringResource(
+                    R.string.schedule_emi_drops,
+                    IndianNumberFormat.rupees(summary.finalMonthlyEmi),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.tertiary,
+            )
+        }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(modifier = Modifier.fillMaxWidth()) {
             HeaderCell(
@@ -100,11 +113,20 @@ fun ScheduleYearHeader(year: ScheduleYear, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = stringResource(
-                R.string.schedule_year_totals,
-                IndianNumberFormat.rupees(year.totalPrincipal),
-                IndianNumberFormat.rupees(year.totalInterest),
-            ),
+            text = if (year.totalPrepaid > 0L) {
+                stringResource(
+                    R.string.schedule_year_totals_prepaid,
+                    IndianNumberFormat.rupees(year.totalPrincipal),
+                    IndianNumberFormat.rupees(year.totalInterest),
+                    IndianNumberFormat.rupees(year.totalPrepaid),
+                )
+            } else {
+                stringResource(
+                    R.string.schedule_year_totals,
+                    IndianNumberFormat.rupees(year.totalPrincipal),
+                    IndianNumberFormat.rupees(year.totalInterest),
+                )
+            },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -114,8 +136,38 @@ fun ScheduleYearHeader(year: ScheduleYear, modifier: Modifier = Modifier) {
 /** One installment row: month, then the principal/interest/balance columns. */
 @Composable
 fun ScheduleRow(installment: Installment, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        InstallmentColumns(installment)
+        if (installment.prepaymentComponent > 0L) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Text(
+                    text = stringResource(
+                        R.string.prepayment_row_label,
+                        IndianNumberFormat.group(installment.prepaymentComponent),
+                    ),
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(50),
+                        )
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InstallmentColumns(installment: Installment) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 3.dp),
     ) {
