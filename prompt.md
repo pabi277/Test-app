@@ -41,14 +41,14 @@
 
 ## State (update at every phase end)
 
-- Phase 0 🚧 bootstrap — snapshot ✅ · plan docs ✅ · skeleton + CI pushed,
-  awaiting green run (record run id here when green, then flip ROADMAP row)
+- Phase 0 ✅ bootstrap (2026-10-11) · CI run 38123389452 green · APK
+  `app-progress-apk` (836 KB) shows the PaisaCalc hello screen
 - Decisions digest: English (India) · rewarded-first + ad-free IAP ·
   4-week budget, no waiver · MIT confirmed · author
   pabitra27.7.06@gmail.com — full log in `docs/DECISIONS.md`
-- Next: once phase 0 CI is green → **phase 1 — EMI engine + core screen** —
-  parts: 1.1 amortization engine, 1.2 Indian currency input UI, 1.3 results
-  screen with donut + schedule
+- Next: **phase 1 — EMI engine + core screen** — parts: 1.1 amortization
+  engine (reducing balance, mmm-yy schedule), 1.2 Indian currency input UI
+  (₹ lakh/crore formatting), 1.3 results screen with donut + schedule
 - Open risks / owner items: complete the on-device ten-1-star audit before
   submission · owner verifies GST slab asset against CBIC portal (law 14) ·
   Play account + closed-test (≥12 testers/14 days) readiness check

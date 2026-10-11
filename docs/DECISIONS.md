@@ -43,3 +43,5 @@ None. (Law 3 four-week budget stands.)
 | Date | Decision | Rationale |
 |---|---|---|
 | 2026-10-11 | App built inside the existing Test-app workspace on session branch `arena/666c81b5-test-app` | Arena session is fixed to this branch; creating a separate GitHub repo is a later GATE action when the owner requests it. Provenance + all plan rules preserved |
+| 2026-10-11 | Phase-0 CI: replaced `android-actions/setup-android@v3` with a plain SDK-license pre-acceptance step (`.github/workflows/ci-build.yml`); pinned template snapshot left unchanged | Third-party action failed at runner setup (run 38123310494); runner image + AGP auto-install make it unnecessary. Deviation from template recorded, reversible |
+| 2026-10-11 | Hello screen uses a framework-theme plain Activity, zero dependencies | Smallest possible bootstrap; UI stack for phase 1 stays a reversible choice |

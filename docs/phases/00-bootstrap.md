@@ -2,12 +2,13 @@
 
 # Phase 00 — bootstrap
 
-- Status: 🚧 · Date: 2026-10-11 · Branch: arena/666c81b5-test-app
-- CI: pending (this commit triggers it) · Provenance: AppFlow @
+- Status: ✅ · Date: 2026-10-11 · Branch: arena/666c81b5-test-app
+- CI: run [38123389452](https://github.com/pabi277/Test-app/actions/runs/38123389452)
+  green (tip sha `6e1a4e3`) · Provenance: AppFlow @
   `c8856022ca57cdf23ae78b9491481543db89438d` (reference only)
-- **APK:** artifact `app-progress-apk` from the CI run of this push — *shows:
-  a hello screen titled "PaisaCalc" with the bootstrap note; no calculator
-  logic yet.*
+- **APK:** artifact `app-progress-apk` (836 KB) from run 38123389452 —
+  *shows: a hello screen titled "PaisaCalc" with the bootstrap note; no
+  calculator logic yet.*
 
 ## Parts
 
@@ -16,7 +17,13 @@
 - 0.2 — Plan docs (`docs/RESEARCH.md`, `ROADMAP.md`, `DECISIONS.md`) +
   `rule.md` + `prompt.md` — ✅ (commit `2fc537e`)
 - 0.3 — MIT LICENSE, filled README, Gradle/AGP hello screen, ci-build.yml,
-  unit test, CI with `app-progress-apk` — 🚧 (this commit; CI result TBD)
+  unit test, CI with `app-progress-apk` — ✅ (green on the 2nd run)
+
+Note: the first run (38123310494) failed at the `Set up Android SDK` step —
+the pinned third-party action `android-actions/setup-android@v3` failed
+during runner setup. Fix (commit `6e1a4e3`): replaced it with a plain
+license-pre-acceptance step; the runner image already provides
+`cmdline-tools`/`ANDROID_HOME` and AGP auto-installs required packages.
 
 ## Evidence (before the change)
 
@@ -44,12 +51,10 @@
 
 ## Tests
 
-- `SmokeTest.arithmeticPipelineWorks` (placeholder; EMI suite in phase 1).
-- CI run id recorded in `prompt.md` once green.
+- `SmokeTest.arithmeticPipelineWorks` (placeholder; EMI suite in phase 1) —
+  green in run 38123389452.
 
 ## Follow-ups
-
-- Mark phase ✅ in `ROADMAP.md` after CI green (facts read back from the run).
 - Owner items unchanged: on-device ten-1-star audit, GST slab verification
   against CBIC, Play account + closed-test readiness.
 - Agent decision logged: hello screen uses a framework-theme plain Activity
