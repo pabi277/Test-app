@@ -3,7 +3,10 @@
 # Phase 04 — Export + polish
 
 - Status: 🚧 · Date: 2026-10-11 · Branch: `arena/4a0902f3-test-app`
-- CI: first run [38131528322](https://github.com/pabi277/Test-app/actions/runs/38131528322) exposed that Robolectric's `PdfDocument` is closed at construction in its JVM runtime (`document is closed!`); Android's native PDF backend is not available to this unit test. The PDF renderer now delegates page slicing to a pure Kotlin paginator, which is directly tested; the PNG renderer remains covered by an actual PNG signature/dimensions test. The full stack was surfaced in [run 38131838704](https://github.com/pabi277/Test-app/actions/runs/38131838704). A green test/build and APK artifact are still pending. Local `./gradlew testDebugUnitTest assembleDebug` is blocked because this workspace has no JDK (`JAVA_HOME` unset and no `java` command).
+- CI: green — [run 38132094699](https://github.com/pabi277/Test-app/actions/runs/38132094699), tip `5f6f308`; all 100 unit tests passed and `assembleDebug` succeeded.
+- **APK:** `app-progress-apk`, 10,801,740 bytes (compressed), uploaded by that run with 30-day retention.
+- The first run [38131528322](https://github.com/pabi277/Test-app/actions/runs/38131528322) exposed that Robolectric's `PdfDocument` is closed at construction in its JVM runtime (`document is closed!`); Android's native PDF backend is unavailable to that unit test. Full failure details were surfaced in [run 38131838704](https://github.com/pabi277/Test-app/actions/runs/38131838704). The PDF renderer now delegates page slicing to a pure Kotlin paginator, which is tested; the PNG renderer is covered by actual signature/dimensions rendering checks.
+- Local `./gradlew testDebugUnitTest assembleDebug` remains blocked because this workspace has no JDK (`JAVA_HOME` unset and no `java` command).
 
 ## Acceptance
 
@@ -21,6 +24,6 @@
 
 ## Verification and handoff
 
-- Unit tests/build and CI `app-progress-apk` artifact: **pending**. Update this section, the roadmap status, and the branch handoff after the first green run; fix any CI failures before declaring the phase complete.
-- No emulator/device was available for visual tablet, low-density, TalkBack, PDF-reader, or real sharesheet QA. The responsive bounds and compact breakpoint are implemented, but manual device verification remains an owner follow-up.
-- On a device, load the built-in quarterly-prepayment example, share the PDF, verify it opens with all installments and prepayment rows, then separately exercise Save PDF and Share image. Check light/dark contrast and TalkBack with the target API before release.
+- CI tests/build and the `app-progress-apk` artifact are green (run 38132094699). PDF pagination and complete prepayment-row retention are unit-tested; the PNG renderer is exercised under Robolectric and its output signature/dimensions are checked. Robolectric cannot execute Android's native `PdfDocument`, so the PDF byte signature is not unit-tested in this environment.
+- No emulator/device was available for visual tablet, low-density, TalkBack, PDF-reader, or real sharesheet QA. The responsive bounds and compact breakpoint are implemented, but manual device verification remains a phase-closure follow-up.
+- Before marking this phase done, install the linked APK, load the built-in quarterly-prepayment example, share the PDF, verify it opens with all installments and prepayment rows, then separately exercise Save PDF and Share image. Check light/dark contrast and TalkBack with the target API.
