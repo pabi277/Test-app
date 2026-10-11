@@ -2,15 +2,16 @@
 
 # Phase 03 — GST tab + offline data layer
 
-- Status: 🚧 · Date: 2026-10-11 · Branch: `arena/4a0902f3-test-app`
-- CI: pending branch push; this workspace has no JDK or Android SDK, so Gradle cannot run locally · Provenance: AppFlow @ `c8856022ca57cdf23ae78b9491481543db89438d` (reference only)
-- **APK:** pending CI artifact `app-progress-apk` — expected to show saved EMI loans, GST add/remove calculations and history, EMI/GST tabs, and a persistent light/dark toggle.
+- Status: ✅ · Date: 2026-10-11 · Branch: `arena/4a0902f3-test-app`
+- CI: green — [run 38129095902](https://github.com/pabi277/Test-app/actions/runs/38129095902), tip `af8752a`; hosted JDK 17 ran unit tests and assembled the debug APK. Initial runs caught and fixed the Kapt plugin-resolution conflict, GST cap constant initialization, and Room test database closing.
+- **APK:** CI uploaded the compressed `app-progress-apk` artifact (10,735,264 bytes). It is built from the phase 3 source and includes the saved-loan flow, GST add/remove screen and history, EMI/GST tabs, and persistent light/dark theme. The artifact is available from the linked Actions run.
+- Local `./gradlew testDebugUnitTest assembleDebug` remains unavailable because this workspace has no JDK (`JAVA_HOME` unset and no `java` command).
 
 ## Parts
 
-- 3.1 — Saved loans and GST history in an offline Room store; no app permissions — 🚧
-- 3.2 — GST add/remove math, intra-state CGST/SGST and inter-state IGST, dated offline rate presets, custom rate, CBIC verification disclaimer — 🚧
-- 3.3 — EMI/GST tab navigation and light/dark theme — 🚧
+- 3.1 — Saved loans and GST history in an offline Room store; no app permissions — ✅
+- 3.2 — GST add/remove math, intra-state CGST/SGST and inter-state IGST, dated offline rate presets, custom rate, CBIC verification disclaimer — ✅
+- 3.3 — EMI/GST tab navigation and light/dark theme — ✅
 
 ## Evidence (before the change)
 
@@ -29,14 +30,13 @@
 - `ui/emi/SavedLoansCard.kt` — save/load/remove actions for loans. Loading reconstructs the original loan and prepayment fields from Room.
 - `gradle/libs.versions.toml` — Room 2.7.2; Robolectric 4.14.1 and AndroidX Test Core 1.6.1 enable a file-backed Room reopen test in the existing unit-test task.
 
-## Tests
+## Tests and verification
 
-- New GST math tests: add/remove in both supply modes, split reconciliation, zero-rate behavior, rate/amount caps, and paise half-up rounding.
-- New GST input/catalog tests: exact rupee-to-paise parsing, custom-rate validation, sanitizer behavior, dated asset metadata, and malformed/duplicate preset rejection.
-- New saved-loan mapper tests: reloads whole loan and prepayment settings.
-- `PaisaDatabaseTest`: writes a saved loan and GST calculation through the repository, closes the file-backed database, reopens it, and asserts both rows remain.
-- `IndianNumberFormatTest`: verifies paise output keeps two decimals and Indian digit grouping.
-- Local `./gradlew testDebugUnitTest assembleDebug` is blocked because `java` is absent (`JAVA_HOME` unset). CI is the executor of record. No physical-device/emulator airplane-mode smoke test was available in this workspace; static evidence is no network permission and no network code.
+- CI run 38129095902 passed unit tests and the debug build. GST tests cover add/remove in both supply modes, split reconciliation, zero-rate behavior, caps, and paise half-up rounding.
+- Input/catalog tests cover exact rupee-to-paise parsing, custom-rate validation, sanitizer behavior, dated asset metadata, and malformed/duplicate preset rejection.
+- Saved-loan mapper tests reload loan and prepayment settings. `PaisaDatabaseTest` writes a loan and GST calculation, closes the file-backed Room database, reopens it, and asserts both rows remain.
+- `IndianNumberFormatTest` verifies paise output keeps two decimals and Indian digit grouping.
+- No physical-device/emulator airplane-mode smoke test was available. Offline evidence is no app permissions/network code plus Room-backed local reads/writes; owner QA still needs to exercise airplane mode and process death on a device.
 
 ## Follow-ups
 
