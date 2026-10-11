@@ -28,6 +28,12 @@ None. (Law 3 four-week budget stands.)
 | 2026-10-11 | minSdk 24, targetSdk 36 | Current Play requirement (RULES.md checkpoint 2026-10-10) + sane floor covering ~99% of active IN devices |
 | 2026-10-11 | GST slabs shipped as a versioned, dated asset with user-editable custom rate | Avoids backend (law 13) and policy-drift risk; owner verifies slabs (law 14) |
 | 2026-10-11 | One refinement question asked after Batch A ("refine" was selected without details) | Needed to write the plan; it was an amendment clarification, not a new batch |
+| 2026-10-11 | Phase 1 engine rounding policy: EMI = half-up round of the published formula; monthly interest = half-up round of `balance × rate / 12` in exact `Long` arithmetic (rate stored in millionths of a percent); months 1..n-1 pay `EMI − interest`; the final installment clears the remaining balance; totals are the sums of the printed columns | Removes floating-point drift from the schedule, so donut, totals and table can never disagree; verified row-by-row against an independent exact-decimal implementation (`tools/emi_reference.py`) and 4/5 published bank examples |
+| 2026-10-11 | Phase 1 UI stack: Jetpack Compose (BOM 2025.08.01 → Compose 1.9.0 / Material3 1.3.2) with the Kotlin 2.2.0 compose compiler plugin; inputs kept in `rememberSaveable` (no ViewModel yet) | Smallest dependency set that stays on the Kotlin 2.2.0 proven green in phase 0; ViewModel/Room belong to phase 3's data layer; reversible |
+| 2026-10-11 | Input caps: ₹100 crore amount, 36% p.a. rate, 480 months tenure | Comfortably above any retail Indian loan and keeps the schedule bounded; the error copy names each cap |
+| 2026-10-11 | Schedule starts at the current month via `java.util.Calendar` (not `java.time`) and labels months `mmm-yy` | `java.time` needs API 26 or desugaring at minSdk 24; mmm-yy is the verified review request (`docs/RESEARCH.md:42`) |
+| 2026-10-11 | `tools/emi_reference.py` is committed (independent reference + golden-data generator); its `emi_golden.json` output is gitignored | Anyone can regenerate and re-verify the numbers the unit tests assert; the tool is not shipped in the APK |
+| 2026-10-11 | Git author identity set to the recorded exit-gate answer `pabitra27.7.06@gmail.com` (phase-0 commits had used a different address) | Brings commits in line with the recorded GATE decision; no re-ask for a recorded answer |
 
 ## Exit-gate answers (asked exactly once, answered 2026-10-11)
 

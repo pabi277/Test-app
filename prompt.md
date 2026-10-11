@@ -45,10 +45,19 @@
   `app-progress-apk` (836 KB) shows the PaisaCalc hello screen
 - Decisions digest: English (India) · rewarded-first + ad-free IAP ·
   4-week budget, no waiver · MIT confirmed · author
-  pabitra27.7.06@gmail.com — full log in `docs/DECISIONS.md`
-- Next: **phase 1 — EMI engine + core screen** — parts: 1.1 amortization
-  engine (reducing balance, mmm-yy schedule), 1.2 Indian currency input UI
-  (₹ lakh/crore formatting), 1.3 results screen with donut + schedule
+  pabitra27.7.06@gmail.com · engine rounding policy: half-up EMI, exact
+  integer monthly interest, final installment closes the loan at exactly
+  zero · phase-1 UI: Compose (BOM 2025.08.01, Kotlin 2.2.0 compiler plugin)
+  · caps ₹100 crore / 36% / 480 months — full log in `docs/DECISIONS.md`
+- Phase 1 ✅ EMI engine + core screen (2026-10-11) · CI run 38124496188
+  green (tip sha `b4f6414`) · APK `app-progress-apk` (10.1 MB) shows a
+  working offline EMI calculation: amount/rate/tenure fields + sliders →
+  EMI, principal-vs-interest donut, totals, and the mmm-yy amortization
+  schedule — record: `docs/phases/01-emi-engine.md`
+- Next: **phase 2 — part-prepayments** — parts: 2.1 prepayment model
+  (monthly/quarterly/half-yearly/yearly/one-time, from-month, amount or
+  EMI-shorten) recomputing the schedule, 2.2 prepayment editor UI + updated
+  schedule/donut with interest-saved callout
 - Open risks / owner items: complete the on-device ten-1-star audit before
   submission · owner verifies GST slab asset against CBIC portal (law 14) ·
   Play account + closed-test (≥12 testers/14 days) readiness check
