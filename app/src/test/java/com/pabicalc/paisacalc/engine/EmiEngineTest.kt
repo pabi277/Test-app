@@ -343,8 +343,14 @@ class EmiEngineTest {
     @Test
     fun microLoansNeverProduceNegativeAmounts() {
         val summary = EmiEngine.calculate(LoanTerms(1L, 36_000_000L, 2), startMonth)
-        assertEquals(2, summary.installments.size)
+        // ₹1 at 36% over 2 months: the ₹1 EMI clears the whole loan in the
+        // first month, and the schedule stops there. Phase 2 made the
+        // schedule always stop the month the balance reaches zero (a
+        // prepayment can close a loan early), so the previous expectation of
+        // 2 rows — the second a phantom zero-payment row — is now 1 row.
+        assertEquals(1, summary.installments.size)
         assertEquals(0L, summary.installments.last().closingBalance)
+        assertEquals(1, summary.monthsSaved)
         summary.installments.forEach { row ->
             assertTrue(row.principalComponent >= 0L)
             assertTrue(row.interestComponent >= 0L)
