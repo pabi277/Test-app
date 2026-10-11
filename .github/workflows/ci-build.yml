@@ -51,6 +51,39 @@ jobs:
           set -o pipefail
           chmod +x ./gradlew
           ./gradlew --no-daemon testDebugUnitTest assembleDebug 2>&1 | tee build-log.txt
+      - name: Surface the failure in check annotations
+        if: failure()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re
+
+          try:
+              text = open('build-log.txt', errors='replace').read()
+          except OSError:
+              print('::error title=CI failure::no build-log.txt was produced')
+              raise SystemExit(0)
+
+          text = re.sub(r'\x1b\[[0-9;]*[A-Za-z]', '', text)
+          lines = text.splitlines()
+          hits = [i for i, line in enumerate(lines) if re.match(r'^(e: |.*error:|.*FAILED|.*What went wrong)', line)]
+
+          def emit(title, body):
+              body = body.replace('%', '%25').replace('\r', '').replace('\n', '%0A')
+              print(f'::error title={title}::{body[:950]}')
+
+          for i in hits[:4]:
+              emit('kotlin/build error', lines[i])
+
+          if hits:
+              start = max(0, hits[0] - 2)
+          else:
+              start = max(0, len(lines) - 120)
+          region = '\n'.join(lines[start:start + 140])[-5000:]
+          for n in range(0, min(len(region), 5400), 900):
+              emit('build log', region[n:n + 900])
+          print(f'::notice title=build log size::{len(lines)} lines')
+          PY
       - name: Upload build log and test reports (diagnostics on failure)
         if: failure()
         uses: actions/upload-artifact@v4
