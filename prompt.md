@@ -48,16 +48,26 @@
   pabitra27.7.06@gmail.com · engine rounding policy: half-up EMI, exact
   integer monthly interest, final installment closes the loan at exactly
   zero · phase-1 UI: Compose (BOM 2025.08.01, Kotlin 2.2.0 compiler plugin)
-  · caps ₹100 crore / 36% / 480 months — full log in `docs/DECISIONS.md`
+  · caps ₹100 crore / 36% / 480 months · phase-2 prepayment policy:
+  prepay after the month's EMI, capped at the balance, schedule stops the
+  month the loan closes; shorten-tenure keeps the EMI / reduce-EMI recomputes
+  it; interest saved = no-plan interest − plan interest — full log in `docs/DECISIONS.md`
 - Phase 1 ✅ EMI engine + core screen (2026-10-11) · CI run 38124496188
   green (tip sha `b4f6414`) · APK `app-progress-apk` (10.1 MB) shows a
   working offline EMI calculation: amount/rate/tenure fields + sliders →
   EMI, principal-vs-interest donut, totals, and the mmm-yy amortization
   schedule — record: `docs/phases/01-emi-engine.md`
-- Next: **phase 2 — part-prepayments** — parts: 2.1 prepayment model
-  (monthly/quarterly/half-yearly/yearly/one-time, from-month, amount or
-  EMI-shorten) recomputing the schedule, 2.2 prepayment editor UI + updated
-  schedule/donut with interest-saved callout
+- Phase 2 ✅ part-prepayments (2026-10-11) · CI run 38125639352 green (tip
+  sha `2344192`) · APK `app-progress-apk` (10.4 MB) shows the calculator with
+  a Prepayments card: one tap on "Example" loads ₹10,00,000 @ 8.5% × 20y with
+  ₹25,000 quarterly from installment 13, and the screen shows "You save
+  ₹7,20,524 in interest", a schedule that closes in 85 installments (Prepaid
+  per year block + per-month pills) and Total prepaid / Interest saved rows
+  — record: `docs/phases/02-prepayments.md`
+- Next: **phase 3 — GST tab + offline data layer** — parts: 3.1 saved
+  loans/GST history Room store (offline, no permissions), 3.2 GST add/remove
+  calculator (CGST/SGST vs IGST, dated slab asset + custom rate, CBIC
+  disclaimer), 3.3 tabbed navigation (EMI · GST) + dark/light theme
 - Open risks / owner items: complete the on-device ten-1-star audit before
   submission · owner verifies GST slab asset against CBIC portal (law 14) ·
   Play account + closed-test (≥12 testers/14 days) readiness check
