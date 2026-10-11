@@ -1,5 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PaisaCalc</string>
-    <string name="bootstrap_note">Bootstrap build — EMI engine lands in phase 1.</string>
+    <string name="top_bar_subtitle">Offline EMI calculator</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_example">Example</string>
+    <string name="privacy_pill">No internet needed · no data collected</string>
+
+    <!-- Inputs -->
+    <string name="input_card_title">Loan details</string>
+    <string name="field_amount_label">Loan amount</string>
+    <string name="currency_symbol">₹</string>
+    <string name="field_rate_label">Interest rate (p.a.)</string>
+    <string name="field_tenure_label">Loan tenure</string>
+    <string name="tenure_suffix_years">years</string>
+    <string name="tenure_suffix_months">months</string>
+    <string name="tenure_unit_years">Years</string>
+    <string name="tenure_unit_months">Months</string>
+
+    <!-- Result states -->
+    <string name="empty_title">Enter your loan details</string>
+    <string name="empty_body">Your EMI, the principal-vs-interest split and the full amortization schedule appear here — calculated on your device, offline.</string>
+    <string name="loading_title">Calculating…</string>
+    <string name="error_title">Check your inputs</string>
+    <string name="issue_amount_not_positive">Enter an amount of at least ₹1.</string>
+    <string name="issue_amount_too_large">Amount cannot be more than ₹1,00,00,00,000 (₹100 crore).</string>
+    <string name="issue_rate_invalid">Enter an interest rate between 0 and 36 percent p.a.</string>
+    <string name="issue_tenure_not_positive">Tenure must be at least 1 month.</string>
+    <string name="issue_tenure_too_long">Tenure cannot be more than 40 years (480 months).</string>
+
+    <!-- Result: EMI hero -->
+    <string name="hero_emi_label">Monthly EMI</string>
+    <string name="hero_terms">%1$s at %2$s p.a.</string>
+    <string name="hero_installments">Installments %1$s → %2$s</string>
+
+    <!-- Result: breakdown -->
+    <string name="breakdown_title">Where your money goes</string>
+    <string name="breakdown_subtitle">Principal and interest over the full tenure</string>
+    <string name="donut_center_label">interest</string>
+    <string name="donut_content_description">Principal %1$s of the total, interest %2$s.</string>
+    <string name="legend_principal">Principal</string>
+    <string name="legend_interest">Interest</string>
+    <string name="amount_with_share">%1$s · %2$s</string>
+    <string name="summary_loan_amount">Loan amount</string>
+    <string name="summary_total_interest">Total interest</string>
+    <string name="summary_total_payable">Total payable</string>
+
+    <!-- Result: schedule -->
+    <string name="schedule_title">Amortization schedule</string>
+    <string name="schedule_subtitle">%1$s · %2$s to %3$s</string>
+    <string name="schedule_emi_label">EMI %1$s per month</string>
+    <string name="schedule_amounts_note">Amounts in ₹</string>
+    <string name="schedule_header_month">Month</string>
+    <string name="schedule_header_principal">Principal</string>
+    <string name="schedule_header_interest">Interest</string>
+    <string name="schedule_header_balance">Balance</string>
+    <string name="schedule_year_label">Year %1$d · %2$s – %3$s</string>
+    <string name="schedule_year_totals">Principal %1$s · Interest %2$s</string>
+    <string name="schedule_final_adjusted">The last installment is %1$s — adjusted so the loan closes at exactly zero.</string>
+    <string name="schedule_estimate_note">Estimates. Bank schedules can differ by a rupee or two because of rounding.</string>
+    <string name="schedule_year_totals_prepaid">Principal %1$s · Interest %2$s · Prepaid %3$s</string>
+    <string name="schedule_emi_drops">EMI drops to %1$s after the prepayments.</string>
+
+    <!-- Prepayments -->
+    <string name="prepayment_card_title">Prepayments</string>
+    <string name="prepayment_card_subtitle">Paying extra cuts interest. Add an amount to see the new schedule.</string>
+    <string name="field_prepayment_amount_label">Prepayment amount</string>
+    <string name="prepayment_frequency_label">How often</string>
+    <string name="prepayment_strategy_label">Apply it by</string>
+    <string name="field_prepayment_from_label">Starting installment</string>
+    <string name="prepayment_from_caption">Installment %1$d of %2$d · %3$s</string>
+    <string name="prepayment_from_caption_short">Installment %1$d · %2$s</string>
+    <string name="prepayment_from_hint">Which installment the prepayment starts from.</string>
+    <string name="prepayment_strategy_shorten_hint">Same EMI, loan closes earlier — the biggest interest saving.</string>
+    <string name="prepayment_strategy_reduce_hint">Lower EMI, loan still ends on time.</string>
+    <string name="prepayment_never_applies">This loan has only %1$d installments, so a prepayment starting at installment %2$d never applies.</string>
+    <string name="prepayment_saved_title">You save %1$s in interest</string>
+    <string name="prepayment_no_interest_saved">A zero-interest loan has no interest to save</string>
+    <string name="prepayment_saved_shorter">The loan closes %1$s earlier — %2$d installments instead of %3$d.</string>
+    <string name="prepayment_saved_same_tenure">The EMI drops to %1$s and the loan still ends in %2$s.</string>
+    <string name="prepayment_total_row_value">Total prepaid %1$s across %2$d installments.</string>
+    <string name="prepayment_shorten_tip">Switching to the shorter-tenure option saves even more interest.</string>
+    <string name="prepayment_breakdown_total">Total prepaid</string>
+    <string name="prepayment_breakdown_saved">Interest saved</string>
+    <string name="prepayment_row_label">Prepaid %1$s</string>
+    <string name="issue_prepayment_amount_invalid">Enter a prepayment between ₹1 and ₹1,00,00,00,000.</string>
+    <string name="issue_prepayment_from_invalid">Starting installment must be between 1 and 480.</string>
 </resources>

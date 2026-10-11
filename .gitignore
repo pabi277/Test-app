@@ -7,3 +7,4 @@ build/
 .externalNativeBuild
 .cxx
 .kotlin/
+emi_golden.json

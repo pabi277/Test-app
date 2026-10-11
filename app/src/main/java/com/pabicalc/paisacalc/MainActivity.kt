@@ -1,16 +1,26 @@
 package com.pabicalc.paisacalc
 
-import android.app.Activity
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import com.pabicalc.paisacalc.ui.emi.EmiCalculatorScreen
+import com.pabicalc.paisacalc.ui.theme.PaisaCalcTheme
 
 /**
- * Phase 0 bootstrap screen: hello world only.
- * The EMI engine and calculator UI land in phase 1.
+ * Single-activity Compose host. Phase 1 replaces the bootstrap hello screen
+ * with the offline EMI calculator (engine + ₹ formatting + amortization
+ * schedule); tabbed navigation arrives in phase 3.
  */
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        enableEdgeToEdge()
+        setContent {
+            PaisaCalcTheme {
+                EmiCalculatorScreen()
+            }
+        }
     }
 }
