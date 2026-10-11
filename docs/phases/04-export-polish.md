@@ -3,7 +3,7 @@
 # Phase 04 — Export + polish
 
 - Status: 🚧 · Date: 2026-10-11 · Branch: `arena/4a0902f3-test-app`
-- CI: pending; no APK artifact is available yet. Local `./gradlew testDebugUnitTest assembleDebug` is blocked because this workspace has no JDK (`JAVA_HOME` unset and no `java` command).
+- CI: first run [38131528322](https://github.com/pabi277/Test-app/actions/runs/38131528322) failed in the new Robolectric PDF-renderer test (`IllegalStateException` at the `PdfDocument` invocation); no APK artifact was uploaded. Full test-failure stack logging is being enabled to identify the cause before choosing the test strategy. Local `./gradlew testDebugUnitTest assembleDebug` is blocked because this workspace has no JDK (`JAVA_HOME` unset and no `java` command).
 
 ## Acceptance
 
