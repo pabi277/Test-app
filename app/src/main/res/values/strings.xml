@@ -1,5 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PaisaCalc</string>
-    <string name="bootstrap_note">Bootstrap build — EMI engine lands in phase 1.</string>
+    <string name="top_bar_subtitle">Offline EMI calculator</string>
+    <string name="action_reset">Reset</string>
+    <string name="privacy_pill">No internet needed · no data collected</string>
+
+    <!-- Inputs -->
+    <string name="input_card_title">Loan details</string>
+    <string name="field_amount_label">Loan amount</string>
+    <string name="currency_symbol">₹</string>
+    <string name="field_rate_label">Interest rate (p.a.)</string>
+    <string name="field_tenure_label">Loan tenure</string>
+    <string name="tenure_suffix_years">years</string>
+    <string name="tenure_suffix_months">months</string>
+    <string name="tenure_unit_years">Years</string>
+    <string name="tenure_unit_months">Months</string>
+
+    <!-- Result states -->
+    <string name="empty_title">Enter your loan details</string>
+    <string name="empty_body">Your EMI, the principal-vs-interest split and the full amortization schedule appear here — calculated on your device, offline.</string>
+    <string name="loading_title">Calculating…</string>
+    <string name="error_title">Check your inputs</string>
+    <string name="issue_amount_not_positive">Enter an amount of at least ₹1.</string>
+    <string name="issue_amount_too_large">Amount cannot be more than ₹1,00,00,00,000 (₹100 crore).</string>
+    <string name="issue_rate_invalid">Enter an interest rate between 0 and 36 percent p.a.</string>
+    <string name="issue_tenure_not_positive">Tenure must be at least 1 month.</string>
+    <string name="issue_tenure_too_long">Tenure cannot be more than 40 years (480 months).</string>
+
+    <!-- Result: EMI hero -->
+    <string name="hero_emi_label">Monthly EMI</string>
+    <string name="hero_terms">%1$s at %2$s p.a.</string>
+    <string name="hero_installments">Installments %1$s → %2$s</string>
+
+    <!-- Result: breakdown -->
+    <string name="breakdown_title">Where your money goes</string>
+    <string name="breakdown_subtitle">Principal and interest over the full tenure</string>
+    <string name="donut_center_label">interest</string>
+    <string name="donut_content_description">Principal %1$s of the total, interest %2$s.</string>
+    <string name="legend_principal">Principal</string>
+    <string name="legend_interest">Interest</string>
+    <string name="amount_with_share">%1$s · %2$s</string>
+    <string name="summary_loan_amount">Loan amount</string>
+    <string name="summary_total_interest">Total interest</string>
+    <string name="summary_total_payable">Total payable</string>
+
+    <!-- Result: schedule -->
+    <string name="schedule_title">Amortization schedule</string>
+    <string name="schedule_subtitle">%1$s · %2$s to %3$s</string>
+    <string name="schedule_emi_label">EMI %1$s per month</string>
+    <string name="schedule_amounts_note">Amounts in ₹</string>
+    <string name="schedule_header_month">Month</string>
+    <string name="schedule_header_principal">Principal</string>
+    <string name="schedule_header_interest">Interest</string>
+    <string name="schedule_header_balance">Balance</string>
+    <string name="schedule_year_label">Year %1$d · %2$s – %3$s</string>
+    <string name="schedule_year_totals">Principal %1$s · Interest %2$s</string>
+    <string name="schedule_final_adjusted">The last installment is %1$s — adjusted so the loan closes at exactly zero.</string>
+    <string name="schedule_estimate_note">Estimates. Bank schedules can differ by a rupee or two because of rounding.</string>
 </resources>

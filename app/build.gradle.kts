@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -41,6 +42,10 @@ android {
         }
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -56,5 +61,21 @@ android {
 }
 
 dependencies {
+    // Compose BOM pins every androidx.compose.* artifact to one tested set
+    // (BOM 2025.08.01 -> Compose 1.9.0, Material3 1.3.2). Compose is built with
+    // Kotlin 2.2.x, matching this project's Kotlin 2.2.0.
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.coroutines.android)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
     testImplementation(libs.junit)
 }
