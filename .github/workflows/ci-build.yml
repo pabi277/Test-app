@@ -93,6 +93,8 @@ jobs:
               annotate('warning', 'aapt2 missing', 'aapt2 was not found; badging evidence unavailable')
 
           permissions = re.findall(r"uses-permission(?:-sdk-\d+)?: name='([^']+)'", badging)
+          annotate('notice', 'aapt2 badging head', ' / '.join(badging.splitlines()[:6]))
+
           def group(pattern, default='?'):
               match = re.search(pattern, badging)
               return match.group(1) if match else default
@@ -165,31 +167,35 @@ jobs:
           annotate('notice', 'ad units in release APK',
                    '; '.join(f'{unit} [{", ".join(sorted(found[unit]))}]' for unit in units) or 'none found')
 
-          def dex_string_neighbours(dex_path, needle):
-              """Show the strings stored next to [needle] — dex string tables group
-              strings by owning class, which identifies the library that ships it."""
-              with open(dex_path, 'rb') as handle:
-                  data = handle.read()
-              if data[:4] != b'dex\n':
-                  return []
-              count, offset = struct.unpack_from('<II', data, 56)
-              def read_string(index):
-                  string_off = struct.unpack_from('<I', data, offset + 4 * index)[0]
-                  position = string_off
-                  while data[position] & 0x80:  # uleb128 utf16 length
-                      position += 1
-                  position += 1
-                  end = data.index(b'\x00', position)
-                  return data[position:end].decode('utf-8', 'replace')
-              try:
-                  strings = [read_string(i) for i in range(count)]
-              except Exception:
-                  return []
-              index = next((i for i, value in enumerate(strings) if value == needle), None)
-              if index is None:
-                  return []
-              neighbours = strings[max(0, index - 3):index + 4]
-              return [value for value in neighbours if value != needle and len(value) < 60]
+          def dependency_owners(needle):
+              """Which cached dependency ships [needle]? Scans the Gradle module cache
+              (bounded to the SDK families this app uses) through nested zips."""
+              import io, zipfile
+              cache = os.environ.get('GRADLE_USER_HOME') or os.path.expanduser('~/.gradle')
+              modules = os.path.join(cache, 'caches', 'modules-2', 'files-2.1')
+              interesting = ('play-services-ads', 'user-messaging-platform', 'billingclient')
+              target = needle.encode()
+              owners = []
+              for root, _dirs, files in os.walk(modules):
+                  for name in files:
+                      full = os.path.join(root, name)
+                      if not name.endswith(('.aar', '.jar')) or not any(k in full for k in interesting):
+                          continue
+                      try:
+                          with zipfile.ZipFile(full) as outer:
+                              inner_names = [n for n in outer.namelist() if n.endswith('.jar')] or ['']
+                              for inner_name in inner_names:
+                                  payload = outer.read(inner_name) if inner_name else None
+                                  if payload is None:
+                                      continue
+                                  with zipfile.ZipFile(io.BytesIO(payload)) as inner:
+                                      for entry in inner.namelist():
+                                          if target in inner.read(entry):
+                                              coordinates = full.split(os.sep + 'files-2.1' + os.sep)[-1]
+                                              owners.append(os.sep.join(coordinates.split(os.sep)[:3]) + f'!{inner_name}!{entry}')
+                      except Exception:
+                          continue
+              return sorted(set(owners))
 
           unknown = [u for u in units if not u.startswith(TEST_PUBLISHER)]
           placeholders = [u for u in unknown if u.split('~')[0].split('/')[0] == 'ca-app-pub-0000000000000000']
@@ -202,11 +208,10 @@ jobs:
                        ', '.join(live) + ' — live units must come from -Ppaisacalc.rewardedAdUnitId')
               sys.exit(1)
           for concern in unknown:
-              context = []
-              for dex in sorted(glob.glob(os.path.join(workdir, 'classes*.dex'))):
-                  context += dex_string_neighbours(dex, concern)
-              annotate('notice', f'origin of {concern}',
-                       ' | '.join(dict.fromkeys(context))[:880] or 'string context unavailable')
+              owners = dependency_owners(concern)
+              annotate('notice', f'dependency shipping {concern}',
+                       (', '.join(owners[:5]) + (f' (+{len(owners) - 5} more)' if len(owners) > 5 else ''))
+                       or 'not found in the cached dependencies')
           if units:
               annotate('notice', 'ad unit policy',
                        'test publisher + SDK placeholders only in this build')
