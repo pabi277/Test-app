@@ -57,6 +57,19 @@
   convenience rates that must be verified against CBIC, CGST receives the
   half-up half and SGST the remainder, two tabs and a persistent
   system-initialized theme — full log in `docs/DECISIONS.md`
+  · phase-5 ads/IAP decisions: ONE opt-in rewarded placement behind a
+  host-testable `AdPolicy` (allowed only when the user asked ∧ consent
+  allows ∧ not ad-free); one completed ad unlocks export for 24 h and the
+  ad-free purchase unlocks it forever; when no ad can be requested or
+  served (offline, no fill, consent withheld) export unlocks anyway for the
+  same window — a calculation is never held behind an ad; the ads SDK
+  initializes only on the user's tap (its auto-init provider is removed in
+  the manifest) and Play billing connects only when the ad-free
+  entry/restore is used; the entitlement is a private `SharedPreferences`
+  flag granted only on `PURCHASED` (PENDING grants nothing); only Google's
+  test ad IDs are committed — live IDs are a GATE through protected build
+  config; `privacy_pill` copy corrected to "Works offline · your data stays
+  on this device" — full log in `docs/DECISIONS.md`
 - Phase 1 ✅ EMI engine + core screen (2026-10-11) · CI run 38124496188
   green (tip sha `b4f6414`) · APK `app-progress-apk` (10.1 MB) shows a
   working offline EMI calculation: amount/rate/tenure fields + sliders →
@@ -77,9 +90,28 @@
   disclaimer, EMI/GST tabs, and persistent light/dark theme; Room close/reopen
   and GST math tests pass
   — record: `docs/phases/03-gst-tab.md`
-- Next: **phase 4 — Export + polish** — parts: 4.1 export the schedule as
-  a ₹-formatted PDF and shareable image via SAF; 4.2 accessibility, tablet/
-  low-dpi layout, icon and theme polish
+- Phase 5 ✅ Ads + ad-free IAP (respectful) (2026-10-13) · CI [run
+  38396702777](https://github.com/pabi277/Test-app/actions/runs/38396702777)
+  green at tip `f774b12` (first try, 3m25s) · uploaded `app-progress-apk`
+  artifact (15,863,439 compressed bytes) builds the export card locked behind
+  "Watch an ad to unlock" + "Go ad-free", the "Ads & ad-free" dialog, Google's
+  TEST rewarded unit (`ca-app-pub-3940256099942544/5224354917`) and the
+  `paisacalc_ad_free` Play product entry; 118 unit-test methods pass, including
+  the 8-test policy suite that proves ads are blocked when the Policy says no
+  — record: `docs/phases/05-ads-iap.md`
+- Next: **phase 6 — Publish readiness** — parts: 6.1 privacy policy hosted,
+  Data Safety answers covering the ads SDK (`INTERNET`, `ACCESS_NETWORK_STATE`,
+  `AD_ID`) and Play's "contains ads" declaration, content rating, target API
+  re-check, closed-test plan (≥12 testers/14 days if the account is eligible);
+  6.2 listing draft (short/long description, screenshot shot-list) + final QA of
+  the signed release build
+- Owner actions from phase 5: create the AdMob app + the one rewarded ad unit
+  (live IDs are a GATE — they ship only through protected build configuration,
+  never Git) · create the one-time non-consumable `paisacalc_ad_free` product in
+  Play Console (Play owns the price) · sideload the phase-5 APK and confirm the
+  test rewarded ad plays, the 24 h unlock holds, the offline/no-fill fallback
+  unlocks and says so, and the ad-free dialog reads correctly · phase 6 answers
+  the "contains ads" declaration and Data Safety for the ads SDK
 - Owner action: add the four `ANDROID_KEYSTORE_*` Actions secrets — the
   main-only signed-release job fails without them (`Missing required Actions
   secret: ANDROID_KEYSTORE_BASE64`, first seen on the PR #1 merge run
