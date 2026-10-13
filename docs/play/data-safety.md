@@ -21,7 +21,7 @@ the phase-6 CI run's release-APK annotations, and
 | Billing | `com.android.billingclient:billing:8.3.0`, one non-consumable product `paisacalc_ad_free`; payment handled by Google Play |
 | Analytics / crash SDKs | none |
 | Accounts / backend | none |
-| App permissions | release-APK evidence in `docs/play/release-qa.md` (expected: `INTERNET`, `ACCESS_NETWORK_STATE`, `com.google.android.gms.permission.AD_ID`, `com.android.vending.BILLING`) |
+| App permissions | verified from the packaged release APK (run 38410820083): `INTERNET`, `ACCESS_NETWORK_STATE`, `com.google.android.gms.permission.AD_ID`, `com.android.vending.BILLING`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION`, `ACCESS_ADSERVICES_TOPICS`, `FOREGROUND_SERVICE`, `WAKE_LOCK`, `…DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` — and none of the location/contacts/storage/media set (`docs/play/release-qa.md`) |
 
 ## Section 1 — Data collection and security
 
@@ -41,7 +41,8 @@ the phase-6 CI run's release-APK annotations, and
 | App info and performance (diagnostics/crash logs) | No | No | — | — | No crash or analytics SDK is included |
 | Personal info (name, email, phone, address, financial info) | No | No | — | — | No account, no form, no server |
 | Financial info (user payment info, credit score, etc.) | No | No | — | — | Purchases are processed by Google Play, which does not require the developer to declare them here; verify against the current form and the Play Billing guidance |
-| Location (precise), Contacts, Messages, Photos/videos, Audio, Files/docs, Calendar, Health, Web browsing, Installed apps | No | No | — | — | The release APK requests none of these permissions; CI fails the build if one appears (see the publish-invariant guard in `.github/workflows/ci-build.yml`) |
+| Location (precise), Contacts, Messages, Photos/videos, Audio, Files/docs, Calendar, Health, Web browsing, Installed apps | No | No | — | — | The packaged release APK declares none of these permissions and none of the storage/media permissions; CI fails the build if any appears (publish-invariant guard in `.github/workflows/ci-build.yml`) |
+| Ad-services permissions (`ACCESS_ADSERVICES_AD_ID`/`ATTRIBUTION`/`TOPICS`) | Declared by the ads SDK | — | Privacy Sandbox ad services | — | Manifest declarations added by Google Mobile Ads 25.5.0; they gate the SDK's use of Android's Privacy Sandbox APIs and are not permissions the user is prompted for |
 
 ## Section 3 — Other declarations that must agree
 

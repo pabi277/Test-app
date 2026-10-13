@@ -30,11 +30,15 @@ who is tired of ad walls and data-hungry calculator apps.
 ## Screenshots
 
 [Add current screenshots from the released app. Do not show features or
-claims that are not present in the current build.]
+claims that are not present in the current build. The capture list and
+rules are in `docs/play/listing-draft.md`; capture from the release
+variant (`app-release-qa-apk` in CI, or the signed build after release).]
 
 ## Privacy and ads
 
-- Privacy policy: [YOUR_PUBLIC_PRIVACY_POLICY_URL — added at phase 6]
+- Privacy policy: the publish-ready text is `docs/play/privacy-policy.md`;
+  it is linked in the app only once it is hosted and the build is given
+  the URL (`-Ppaisacalc.privacyPolicyUrl=…`) — until then no link is shown
 - Data Safety: see the Google Play listing; it reflects this exact build and
   all included SDKs. The Google Mobile Ads SDK and the Google Play Billing
   library are the only components that can reach the network.
@@ -59,6 +63,12 @@ Development builds use Google's test ad units and the `paisacalc_ad_free`
 product ID only; live AdMob identifiers are injected through protected build
 configuration (`-Ppaisacalc.admobAppId=… -Ppaisacalc.rewardedAdUnitId=…`) and
 are never committed.
+
+CI uploads two installable artifacts per push: `app-progress-apk` (debug) and
+`app-release-qa-apk` (the release variant, debug-signed — for device QA only,
+never for upload). The same run inspects the packaged release APK and fails on
+any privacy-invariant permission or on an ad unit that is neither Google's test
+unit nor an SDK placeholder; findings appear as check annotations.
 
 Release artifacts are built by GitHub Actions. Signing credentials are stored
 in protected Actions secrets, not in this repository. See
@@ -92,6 +102,10 @@ backup are disabled for the app data.
 - Google Play: [YOUR_PUBLIC_PLAY_LISTING_URL — after publish]
 - Support contact: [YOUR_PUBLIC_SUPPORT_EMAIL]
 - Target API: 36 (re-check the Play target-API policy before every release)
+- Publish-readiness pack: `docs/play/` — privacy policy text, Data Safety and
+  content-rating worksheets, closed-test plan, listing draft, the release
+  checklist, and the release-variant QA record. Submission stops at the owner's
+  gate: nothing is uploaded to Play by CI.
 
 Do not leave bracketed placeholders in a public release. Never add signing
 keys, service-account JSON, account IDs, private tester data, or real AdMob

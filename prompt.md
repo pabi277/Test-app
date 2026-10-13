@@ -69,7 +69,17 @@
   flag granted only on `PURCHASED` (PENDING grants nothing); only Google's
   test ad IDs are committed — live IDs are a GATE through protected build
   config; `privacy_pill` copy corrected to "Works offline · your data stays
-  on this device" — full log in `docs/DECISIONS.md`
+  on this device"   · phase-6 publish-readiness decisions: store/legal answers live in
+  `docs/play/` (privacy policy text, Data Safety + content-rating worksheets,
+  closed-test plan, listing draft, the playbook checklist copy, release-QA
+  record); the in-app policy link is config-driven and hidden until
+  `-Ppaisacalc.privacyPolicyUrl=…` is set, so no dead link ships; CI now
+  builds and uploads the release variant as `app-release-qa-apk`
+  (debug-signed, QA only — signed artifacts stay main-only) and fails the run
+  on any privacy-invariant permission or on a non-test ad unit that did not
+  come from protected config, reporting findings as check annotations; the
+  AdMob Data Safety rows stay marked unverified until checked in Console
+  against Google's SDK guidance — full log in `docs/DECISIONS.md`
 - Phase 1 ✅ EMI engine + core screen (2026-10-11) · CI run 38124496188
   green (tip sha `b4f6414`) · APK `app-progress-apk` (10.1 MB) shows a
   working offline EMI calculation: amount/rate/tenure fields + sliders →
@@ -99,12 +109,36 @@
   `paisacalc_ad_free` Play product entry; 118 unit-test methods pass, including
   the 8-test policy suite that proves ads are blocked when the Policy says no
   — record: `docs/phases/05-ads-iap.md`
-- Next: **phase 6 — Publish readiness** — parts: 6.1 privacy policy hosted,
-  Data Safety answers covering the ads SDK (`INTERNET`, `ACCESS_NETWORK_STATE`,
-  `AD_ID`) and Play's "contains ads" declaration, content rating, target API
-  re-check, closed-test plan (≥12 testers/14 days if the account is eligible);
-  6.2 listing draft (short/long description, screenshot shot-list) + final QA of
-  the signed release build
+- Phase 6 ✅ Publish readiness (2026-10-13) · CI [run
+  38411379003](https://github.com/pabi277/Test-app/actions/runs/38411379003)
+  green at tip `5f6a815` · uploaded `app-release-qa-apk` (11,421,560 bytes — the
+  **release** variant, debug-signed for QA) and `app-progress-apk`
+  (15,865,174 bytes) · the release APK is 12,180,110 bytes, versionCode 1,
+  versionName 0.1.0, minSdk 24, targetSdk 36, and CI verified its packaged
+  permission list (INTERNET, ACCESS_NETWORK_STATE, AD_ID, BILLING, ads Privacy
+  Sandbox services, FOREGROUND_SERVICE, WAKE_LOCK, AndroidX receiver permission)
+  and ad ids (Google test units only, plus the UMP consent SDK's all-zero
+  placeholder) — no location/storage/contacts/camera/mic/phone/SMS permission ·
+  121 unit tests pass · publish pack in `docs/play/`, record:
+  `docs/phases/06-publish-readiness.md`
+- Next: **the launch sequence** (owner-gated): host the policy and give its URL ·
+  support email + developer name · 512 icon + 1024×500 feature graphic · the four
+  `ANDROID_KEYSTORE_*` secrets (then the main-only signed release job builds the
+  upload artifact) · AdMob rewarded unit + `paisacalc_ad_free` product and the
+  live-id switch through protected config · Data Safety, content rating, target
+  audience in Console · upload to the closed track, recruit 12+ testers for 14
+  continuous days, then apply for production access · submit only on the owner's
+  explicit command. After release: measure the `docs/RESEARCH.md` kill test four
+  weeks after the public release date, and follow
+  `knowledge/maintenance-cadence.md`
+- Owner actions from phase 6 (all gates): decide where the privacy policy is
+  hosted and provide its URL · provide the public support email and developer
+  name for the policy and listing · approve the store artwork, then produce the
+  512×512 icon and 1024×500 feature graphic · add the four `ANDROID_KEYSTORE_*`
+  Actions secrets · create the AdMob rewarded unit and the `paisacalc_ad_free`
+  product · answer Data Safety, content rating and target audience in Console ·
+  run the closed test (12+ testers, 14 continuous days) · give the explicit
+  merge and publish commands (`docs/play/checklist.md` orders all of this)
 - Owner actions from phase 5: create the AdMob app + the one rewarded ad unit
   (live IDs are a GATE — they ship only through protected build configuration,
   never Git) · create the one-time non-consumable `paisacalc_ad_free` product in

@@ -13,12 +13,12 @@ release day is part of the process, not optional.
 
 | Item | Status | Evidence / next step |
 | --- | --- | --- |
-| Green CI; tests pass; release artifacts available; upload key not in Git | ✅ | [run 38397298184](https://github.com/pabi277/Test-app/actions/runs/38397298184) (phase 5) and the phase-6 run in `docs/play/release-qa.md`; `app-progress-apk` + `app-release-qa-apk`; no keystore in the repo (`ANDROID_KEYSTORE_*` Actions secrets, main-only job) |
-| Signed release AAB + APK available | 🕒 | The main-only `signed-release` job needs the four `ANDROID_KEYSTORE_*` secrets; until they exist it fails at the preflight step. QA builds are the debug-signed release variant |
+| Green CI; tests pass; release artifacts available; upload key not in Git | ✅ | [run 38411379003](https://github.com/pabi277/Test-app/actions/runs/38411379003) (phase 6, tip `5f6a815`): unit tests, debug APK, **release variant** and the invariant guard green; `app-progress-apk` (15,865,176 bytes) + `app-release-qa-apk` (11,421,552 bytes) uploaded; no keystore in the repo (`ANDROID_KEYSTORE_*` Actions secrets, main-only job) |
+| Signed release AAB + APK available | 🕒 | The main-only `signed-release` job needs the four `ANDROID_KEYSTORE_*` secrets; until they exist it fails at the preflight step. The debug-signed release-variant QA build is what exists today (`docs/play/release-qa.md`) |
 | Target API 36+ (policy date 2026-08-31) | ✅ + 🕒 re-check | `targetSdk = 36`, `compileSdk = 36` in `app/build.gradle.kts`; re-read the live policy in Console on upload day |
 | App genuinely distinct and functional | ✅ | `docs/RESEARCH.md` niche verdict + the nine verified competitor complaint themes this build answers; no reskin, no borrowed IP |
 | Content-rating questionnaire completed honestly | 🕒 | Answers drafted in `docs/play/content-rating.md`; the form is a Console action |
-| Every permission and SDK reviewed; nothing unneeded | ✅ | Phase-6 CI guard fails the release build on any privacy-invariant permission; SDK inventory in `docs/play/data-safety.md` |
+| Every permission and SDK reviewed; nothing unneeded | ✅ | Phase-6 CI guard fails the release build on any privacy-invariant permission and reports the packaged permission list (10 entries, all accounted for) plus every ad id; SDK inventory in `docs/play/data-safety.md` and `docs/play/release-qa.md` |
 
 ## Listing assets and text
 
