@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: MIT
+#
+# Publishes the privacy policy and the app's landing page to GitHub Pages from
+# the `docs/` folder of the default branch (`main`).
+#
+# GATE: this workflow is prepared but not enabled. Nothing is published to the
+# owner's account until the owner (a) merges this file to `main` and (b) turns
+# Pages on with the Source set to "GitHub Actions"
+# (Settings → Pages → Build and deployment → Source: GitHub Actions).
+# Both are explicit owner actions; CI never publishes on its own.
+name: Docs site (privacy policy)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy the docs site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload the docs folder as the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

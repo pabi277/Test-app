@@ -2,13 +2,15 @@
 
 # PaisaCalc — Privacy policy (publish-ready text)
 
-> **Status:** drafted 2026-10-13 from the phase-5 shipped build. Publish this at
-> a public URL, then link it in Play Console and set the same URL in the app
+> **Status:** the editable source of the published page. The hosted copy lives
+> at `docs/privacy-policy.md` (GitHub Pages, `docs/` folder of `main`) and is the
+> URL that goes in Play Console and in the app build
 > (`-Ppaisacalc.privacyPolicyUrl=…`; an unset URL hides the in-app link rather
 > than shipping a dead one).
 >
-> **Owner fields still to fill (gate):** `[EFFECTIVE_DATE]`,
-> `[PUBLIC_DEVELOPER_NAME]`, `[SUPPORT_EMAIL]`, `[POLICY_URL]`.
+> **Owner facts resolved (gate answer 2026-10-13):** effective date 2026-10-13 ·
+> developer *Pabitra Chakrabortty* · contact `pabitra27.7.06@gmail.com` · policy
+> URL `https://pabi277.github.io/Test-app/privacy-policy/`.
 >
 > **Before publishing, re-check this against the exact release:** the merged
 > manifest permissions, the ad units in the build, Play Data Safety answers and
@@ -18,10 +20,10 @@
 
 # PaisaCalc privacy policy
 
-- **Effective date:** [EFFECTIVE_DATE]
-- **Developer:** [PUBLIC_DEVELOPER_NAME]
-- **Contact:** [SUPPORT_EMAIL]
-- **Policy URL:** [POLICY_URL]
+- **Effective date:** 2026-10-13 | mirrored in `docs/privacy-policy.md`
+- **Developer:** Pabitra Chakrabortty
+- **Contact:** pabitra27.7.06@gmail.com
+- **Policy URL:** https://pabi277.github.io/Test-app/privacy-policy/
 
 PaisaCalc is an offline EMI (loan installment) and GST calculator for India. It
 was built so that the numbers people care about — their EMI, their repayment
@@ -128,7 +130,7 @@ Android's share sheet or document picker.
 
 Because PaisaCalc has no account and no server, there is no account-deletion
 process to request — uninstalling the app deletes everything the app stored.
-For questions or requests about ad-related data, contact [SUPPORT_EMAIL] and we
+For questions or requests about ad-related data, contact pabitra27.7.06@gmail.com and we
 will point you to the right Google process.
 
 ## Children
@@ -146,4 +148,4 @@ notes on Google Play.
 
 ## Contact
 
-Questions about this policy: **[SUPPORT_EMAIL]**
+Questions about this policy: **pabitra27.7.06@gmail.com**

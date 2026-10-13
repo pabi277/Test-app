@@ -99,14 +99,27 @@
 
 ## Gate items this phase surfaced (owner, in `docs/play/checklist.md`)
 
-1. Where the privacy policy will be hosted (deploy = gate) and the resulting
-   `[POLICY_URL]`.
-2. `[SUPPORT_EMAIL]` and the public developer name.
-3. The 512×512 store icon and 1024×500 feature graphic (artwork approval).
-4. The four `ANDROID_KEYSTORE_*` secrets, so the main-only signed-release job can
+Answered at the gate on 2026-10-13:
+
+1. ✅ **Privacy policy hosting: GitHub Pages.** The hosted page is
+   `docs/privacy-policy.md`, published by `.github/workflows/pages.yml` from the
+   `docs/` folder. Remaining owner actions: merge the workflow to `main` and
+   enable Pages (Settings → Pages → Source: GitHub Actions); the URL is
+   `https://pabi277.github.io/Test-app/privacy-policy/`.
+2. ✅ **Public facts:** developer *Pabitra Chakrabortty*, contact
+   `pabitra27.7.06@gmail.com` (written into the policy, the listing draft and the
+   checklist).
+3. ✅ **This branch stays unmerged for now** — the owner put the PR on hold; no
+   PR was opened this phase.
+
+Still open:
+
+4. The 512×512 store icon and 1024×500 feature graphic (artwork approval).
+5. The four `ANDROID_KEYSTORE_*` secrets, so the main-only signed-release job can
    produce the upload artifact.
-5. AdMob rewarded unit + `paisacalc_ad_free` product, and the live-id release
+6. AdMob rewarded unit + `paisacalc_ad_free` product, and the live-id release
    switch through protected configuration.
-6. Data Safety, content rating, target audience, and the closed-test run in
+7. Data Safety, content rating, target audience, and the closed-test run in
    Console.
-7. The explicit publish command (and the PR/merge that precede it).
+8. The explicit publish command (and the PR/merge that precede it, which stay on
+   hold until the owner asks).

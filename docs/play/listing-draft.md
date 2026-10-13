@@ -14,8 +14,8 @@ Character counts were checked on 2026-10-13 against Play's current limits (title
 | App name (≤30) | **`PaisaCalc: Loan EMI & GST Calc`** (30) | Alternates: `PaisaCalc: EMI & GST Calc` (25), `PaisaCalc — Loan EMI & GST` (26). Owner picks at the gate; the name must stay "PaisaCalc" unless the gate changes the working name |
 | Short description (≤80) | **`Offline EMI calculator: prepayments, ₹ lakh/crore numbers, PDF export, GST tab.`** (79) | Leads with the search term "EMI calculator" and the differentiators |
 | Category | Finance (alternate: Tools) | Matches `docs/play/content-rating.md` |
-| Contact email | `[SUPPORT_EMAIL]` — owner fills at the gate | Must be a monitored address, shown publicly |
-| Privacy policy URL | `[POLICY_URL]` — owner fills after hosting | Also set in the app build (`-Ppaisacalc.privacyPolicyUrl=…`) |
+| Contact email | **`pabitra27.7.06@gmail.com`** (gate answer 2026-10-13) | Must be a monitored address, shown publicly |
+| Privacy policy URL | **`https://pabi277.github.io/Test-app/privacy-policy/`** (GitHub Pages; live once the owner enables Pages) | Also set in the app build (`-Ppaisacalc.privacyPolicyUrl=…`) |
 | Contains ads | Yes | One opt-in rewarded ad (see `docs/play/data-safety.md`) |
 | In-app purchases | Yes | One one-time ad-free purchase, `paisacalc_ad_free` |
 | Website / other | none | Do not add a site that does not exist |
@@ -120,4 +120,5 @@ wants tablet featuring, and check the current Console requirements then.
 - [ ] Screenshot captions and the theme used for capture.
 - [ ] Whether to produce the 512 icon and feature graphic now (and approve the
       artwork direction) or just before upload.
-- [ ] `[SUPPORT_EMAIL]`, developer name, and the hosted `[POLICY_URL]`.
+- [x] Developer name *Pabitra Chakrabortty*, contact `pabitra27.7.06@gmail.com`, policy URL `https://pabi277.github.io/Test-app/privacy-policy/` — answered at the gate 2026-10-13.
+- [ ] Remaining at the gate: app name, description wording, screenshot captions/theme, artwork decision.

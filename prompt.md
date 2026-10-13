@@ -121,16 +121,29 @@
   placeholder) — no location/storage/contacts/camera/mic/phone/SMS permission ·
   121 unit tests pass · publish pack in `docs/play/`, record:
   `docs/phases/06-publish-readiness.md`
-- Next: **the launch sequence** (owner-gated): host the policy and give its URL ·
-  support email + developer name · 512 icon + 1024×500 feature graphic · the four
-  `ANDROID_KEYSTORE_*` secrets (then the main-only signed release job builds the
-  upload artifact) · AdMob rewarded unit + `paisacalc_ad_free` product and the
-  live-id switch through protected config · Data Safety, content rating, target
-  audience in Console · upload to the closed track, recruit 12+ testers for 14
-  continuous days, then apply for production access · submit only on the owner's
-  explicit command. After release: measure the `docs/RESEARCH.md` kill test four
-  weeks after the public release date, and follow
-  `knowledge/maintenance-cadence.md`
+- Gate answers (2026-10-13): privacy policy hosted on **GitHub Pages** — page
+  `docs/privacy-policy.md`, workflow `.github/workflows/pages.yml`; owner merges
+  the workflow to `main` and enables Pages (Settings → Pages → Source: GitHub
+  Actions) → URL `https://pabi277.github.io/Test-app/privacy-policy/` · developer
+  name **Pabitra Chakrabortty** · public contact **pabitra27.7.06@gmail.com** ·
+  **no PR this phase — the branch is held as asked** · Play-side setup (keystore
+  secrets, AdMob unit, `paisacalc_ad_free`) not created yet; QA builds keep
+  Google's test ad units
+- Next: **the launch sequence** (owner-gated): merge `.github/workflows/pages.yml`
+  to `main` and enable Pages · build the signed release (`ANDROID_KEYSTORE_*`
+  secrets) after the keystore exists · create the AdMob rewarded unit and the
+  `paisacalc_ad_free` product, then supply live ids through protected config ·
+  produce the 512 icon + 1024×500 feature graphic · answer Data Safety, content
+  rating and target audience in Console · upload to the closed track, recruit
+  12+ testers for 14 continuous days, then apply for production access · open the
+  PR and submit only on the owner's explicit command. After release: measure the
+  `docs/RESEARCH.md` kill test four weeks after the public release date, and
+  follow `knowledge/maintenance-cadence.md`
+- Owner actions from phase 6 — answered: Pages hosting yes (workflow prepared,
+  owner merges + enables), public name/contact recorded; PR/merge on hold. Still
+  open: enable Pages and give the URL to the console/build, keystore secrets,
+  AdMob unit, `paisacalc_ad_free` product, artwork, Console forms, closed test,
+  and the explicit merge/publish commands (`docs/play/checklist.md` orders them)
 - Owner actions from phase 6 (all gates): decide where the privacy policy is
   hosted and provide its URL · provide the public support email and developer
   name for the policy and listing · approve the store artwork, then produce the

@@ -35,7 +35,7 @@ release day is part of the process, not optional.
 
 | Item | Status | Evidence / next step |
 | --- | --- | --- |
-| Working privacy-policy URL, linked in Console **and** in the app | ⛔ | Text is publish-ready in `docs/play/privacy-policy.md`; hosting is a gate. The in-app link is implemented and config-driven (`-Ppaisacalc.privacyPolicyUrl=…`, hidden when unset) |
+| Working privacy-policy URL, linked in Console **and** in the app | 🕒 | Owner chose GitHub Pages (2026-10-13): the hosted page is `docs/privacy-policy.md` and `.github/workflows/pages.yml` publishes the `docs/` folder. **Remaining owner actions:** merge the workflow to `main` and enable Pages (Settings → Pages → Source: GitHub Actions). The URL `https://pabi277.github.io/Test-app/privacy-policy/` is then set in Console and in the app build via `-Ppaisacalc.privacyPolicyUrl=…` (the in-app link stays hidden until it is set) |
 | Data Safety truthful for the app and every SDK | 🕒 | Worksheet in `docs/play/data-safety.md`; the AdMob rows must be confirmed against Google's published SDK guidance in Console |
 | AdMob/analytics/billing behavior declared; consent and privacy options tested | ✅ + 🕒 | One opt-in rewarded placement, UMP consent on every launch, privacy-options entry in ⋮ → *Ads & ad-free*; consent flow needs a Play-installed device run (owner) |
 | Content rating and target audience forms match the app | 🕒 | `docs/play/content-rating.md` |
@@ -57,9 +57,12 @@ release day is part of the process, not optional.
 
 ## Remaining work before submission (ordered)
 
-1. Owner answers the phase-6 gate: `[SUPPORT_EMAIL]`, developer name, and where the
-   policy will be hosted.
-2. Host the policy; set `[POLICY_URL]` in Console and in the release build config.
+1. ~~Owner answers the phase-6 gate~~ **Answered 2026-10-13:** developer
+   *Pabitra Chakrabortty*, contact `pabitra27.7.06@gmail.com`, policy hosted on
+   GitHub Pages; the branch PR is explicitly on hold.
+2. Host the policy: merge `.github/workflows/pages.yml` to `main`, enable Pages
+   (Settings → Pages → Source: GitHub Actions), then set the resulting URL in
+   Console and in the release build config (`-Ppaisacalc.privacyPolicyUrl=…`).
 3. Produce the 512 icon + feature graphic (owner approves artwork).
 4. Add the four `ANDROID_KEYSTORE_*` secrets; run the main-only signed release job.
 5. Create the AdMob rewarded unit and the `paisacalc_ad_free` product; supply the
