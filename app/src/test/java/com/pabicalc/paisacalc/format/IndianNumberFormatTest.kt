@@ -43,6 +43,13 @@ class IndianNumberFormatTest {
     }
 
     @Test
+    fun paiseAmountsKeepTwoDecimalsAndIndianGrouping() {
+        assertEquals("₹1,23,45,678.09", IndianNumberFormat.rupeesAndPaise(1_234_567_809L))
+        assertEquals("₹0.05", IndianNumberFormat.rupeesAndPaise(5L))
+        assertEquals("₹1,00,00,00,000.00", IndianNumberFormat.rupeesAndPaise(100_000_000_000L))
+    }
+
+    @Test
     fun compactRendersLakhAndCrore() {
         assertEquals("₹99,999", IndianNumberFormat.compactRupees(99_999L))
         assertEquals("₹1 L", IndianNumberFormat.compactRupees(100_000L))

@@ -51,6 +51,7 @@
     <string name="schedule_emi_label">EMI %1$s per month</string>
     <string name="schedule_amounts_note">Amounts in ₹</string>
     <string name="schedule_header_month">Month</string>
+    <string name="schedule_header_emi">EMI</string>
     <string name="schedule_header_principal">Principal</string>
     <string name="schedule_header_interest">Interest</string>
     <string name="schedule_header_balance">Balance</string>
@@ -85,4 +86,89 @@
     <string name="prepayment_row_label">Prepaid %1$s</string>
     <string name="issue_prepayment_amount_invalid">Enter a prepayment between ₹1 and ₹1,00,00,00,000.</string>
     <string name="issue_prepayment_from_invalid">Starting installment must be between 1 and 480.</string>
+
+    <!-- Phase 3: saved loans -->
+    <string name="saved_loans_title">Saved loans</string>
+    <string name="saved_loans_subtitle">Stored on this device, including prepayment settings.</string>
+    <string name="saved_loans_empty">No saved loans yet. Calculate a loan, then save it here.</string>
+    <string name="action_save_loan">Save current loan</string>
+    <string name="action_load">Load</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="saved_loan_title_format">%1$s · %2$s · %3$s</string>
+    <string name="saved_loan_details">%1$s at %2$s · %3$s</string>
+    <string name="saved_loan_saved_on_device">Loan saved on this device.</string>
+    <string name="saved_loan_loaded">Saved loan loaded.</string>
+    <string name="saved_loan_removed">Saved loan removed.</string>
+    <string name="delete_saved_loan_title">Remove saved loan?</string>
+    <string name="delete_saved_loan_message">Remove %1$s from this device?</string>
+    <string name="local_storage_error">Could not access on-device storage. Please try again.</string>
+
+    <!-- Phase 3: GST calculator and history -->
+    <string name="gst_top_bar_subtitle">Offline GST calculator</string>
+    <string name="gst_calculator_title">GST calculator</string>
+    <string name="gst_calculator_subtitle">Add GST to a base price or extract GST from an inclusive amount.</string>
+    <string name="gst_add_mode">Add GST</string>
+    <string name="gst_remove_mode">Remove GST</string>
+    <string name="gst_amount_before_label">Amount before GST</string>
+    <string name="gst_amount_including_label">Amount including GST</string>
+    <string name="gst_amount_placeholder">e.g. 1,000.00</string>
+    <string name="gst_amount_helper">Up to ₹100 crore · enter up to two decimal places.</string>
+    <string name="gst_amount_invalid">Enter an amount greater than zero.</string>
+    <string name="gst_amount_too_large">Amount cannot exceed ₹100 crore.</string>
+    <string name="gst_supply_type_label">Supply type</string>
+    <string name="gst_intra_state">Intra-state · CGST + SGST</string>
+    <string name="gst_inter_state">Inter-state · IGST</string>
+    <string name="gst_rate_label">GST rate</string>
+    <string name="gst_custom_rate">Custom</string>
+    <string name="gst_custom_rate_label">Custom rate</string>
+    <string name="gst_custom_rate_helper">Enter a rate from 0 to 100; verify what applies to your supply.</string>
+    <string name="gst_rate_invalid">Enter a rate from 0 to 100.</string>
+    <string name="gst_rate_asset_as_of">Preset list effective from %1$s</string>
+    <string name="gst_rate_disclaimer">Presets are not an HSN lookup. Rates and conditions vary by item and can change; verify the applicable rate against CBIC.</string>
+    <string name="gst_result_added_title">GST added</string>
+    <string name="gst_result_removed_title">GST extracted</string>
+    <string name="gst_taxable_value">Taxable value</string>
+    <string name="gst_amount_entered">Amount entered</string>
+    <string name="gst_tax_amount_at_rate">GST at %1$s percent</string>
+    <string name="gst_cgst_at_rate">CGST at %1$s percent</string>
+    <string name="gst_sgst_at_rate">SGST at %1$s percent</string>
+    <string name="gst_igst_at_rate">IGST at %1$s percent</string>
+    <string name="gst_total_including">Total including GST</string>
+    <string name="gst_total_entered">Total amount</string>
+    <string name="gst_save_to_history">Save calculation</string>
+    <string name="gst_history_title">Recent GST calculations</string>
+    <string name="gst_history_subtitle">Saved on this device · up to 50 entries.</string>
+    <string name="gst_history_empty">Saved calculations will appear here.</string>
+    <string name="gst_history_saved">GST calculation saved.</string>
+    <string name="gst_history_removed">GST history entry removed.</string>
+    <string name="gst_history_item_title">%1$s · %2$s percent GST</string>
+    <string name="gst_history_item_detail">Input %1$s · tax %2$s · total %3$s</string>
+    <string name="gst_history_igst">IGST %1$s</string>
+    <string name="gst_history_cgst_sgst">CGST %1$s · SGST %2$s</string>
+
+    <!-- Phase 3: tabs and theme -->
+    <string name="tab_emi">EMI</string>
+    <string name="tab_gst">GST</string>
+    <string name="action_theme_light">Light</string>
+    <string name="action_theme_dark">Dark</string>
+
+    <!-- Phase 4: export, accessibility and responsive polish -->
+    <string name="action_more_options">More options</string>
+    <string name="export_card_title">Export this schedule</string>
+    <string name="export_card_subtitle">Includes all %1$d installments and any prepayments.</string>
+    <string name="export_save_pdf">Save PDF</string>
+    <string name="export_share_pdf">Share PDF</string>
+    <string name="export_share_image">Share image</string>
+    <string name="export_pdf_saved">PDF schedule saved.</string>
+    <string name="export_failed">Could not export this schedule. Please try again.</string>
+    <string name="export_chooser_title">Share loan schedule</string>
+    <string name="slider_loan_amount_description">Loan amount slider</string>
+    <string name="slider_interest_rate_description">Annual interest rate slider</string>
+    <string name="slider_tenure_description">Loan tenure slider</string>
+    <string name="schedule_row_accessibility">Installment %1$d, %2$s. EMI %3$s. Principal %4$s. Interest %5$s. Prepayment %6$s. Closing balance %7$s.</string>
+    <string name="schedule_no_prepayment">none</string>
+    <string name="load_saved_loan_accessibility">Load saved loan %1$s</string>
+    <string name="remove_saved_loan_accessibility">Remove saved loan %1$s</string>
+    <string name="remove_gst_history_accessibility">Remove GST calculation for %1$s at %2$s percent</string>
 </resources>

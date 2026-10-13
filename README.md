@@ -16,8 +16,12 @@ who is tired of ad walls and data-hungry calculator apps.
 - Models part-prepayments (monthly/quarterly/half-yearly/yearly/one-time)
   and shows the interest saved.
 - Formats Indian currency correctly (lakh/crore grouping).
-- Offline GST tab: add/remove GST with CGST/SGST or IGST split, dated slab
-  asset plus custom rate, with a verify-against-CBIC disclaimer.
+- Offline GST tab: add or extract GST with CGST/SGST or IGST split, a dated
+  rate-preset asset plus custom rate, paise-precision results, and a
+  verify-against-CBIC disclaimer.
+- Saves reusable loans (including the prepayment settings) and recent GST
+  calculations in a private on-device Room database.
+- Switches between light and dark themes.
 - Exports the schedule as PDF or a shareable image.
 - Works fully offline; collects no personal data and needs no location or
   account.
@@ -52,9 +56,12 @@ in protected Actions secrets, not in this repository. See
 
 ## Permissions and data
 
-PaisaCalc requests no location, contacts, or phone permissions. The only
-system interaction is the share sheet used for PDF/image export. All loan
-and GST history is stored locally on the device and never leaves it.
+PaisaCalc requests no location, contacts, phone, or internet permission. PDFs
+can be saved through Android's Storage Access Framework document picker or
+shared alongside PNG schedules from private cache URIs through the Android
+sharesheet. No broad storage permission is requested. Loan and GST history is
+stored locally in the app's private database; Android cloud and device-transfer
+backup are disabled for the app data.
 
 ## License and credits
 

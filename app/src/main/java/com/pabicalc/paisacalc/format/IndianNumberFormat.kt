@@ -31,6 +31,15 @@ object IndianNumberFormat {
     /** Renders rupees with the ₹ sign: `2500000` -> `₹25,00,000`. */
     fun rupees(value: Long): String = "₹" + group(value)
 
+    /** Renders paise with two decimal places and Indian digit grouping. */
+    fun rupeesAndPaise(valuePaise: Long): String {
+        val negative = valuePaise < 0L
+        val wholeRupees = kotlin.math.abs(valuePaise / 100L)
+        val paise = kotlin.math.abs(valuePaise % 100L).toString().padStart(2, '0')
+        val sign = if (negative) "-" else ""
+        return "₹$sign${group(wholeRupees)}.$paise"
+    }
+
     /**
      * Compact lakh/crore rendering for tight labels (slider ends, chips):
      * `100000` -> `₹1 L`, `1250000` -> `₹12.5 L`, `12345678` -> `₹1.23 Cr`.

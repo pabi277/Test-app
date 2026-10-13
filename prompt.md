@@ -51,7 +51,12 @@
   · caps ₹100 crore / 36% / 480 months · phase-2 prepayment policy:
   prepay after the month's EMI, capped at the balance, schedule stops the
   month the loan closes; shorten-tenure keeps the EMI / reduce-EMI recomputes
-  it; interest saved = no-plan interest − plan interest — full log in `docs/DECISIONS.md`
+  it; interest saved = no-plan interest − plan interest · phase-3 decisions:
+  Room stores loans/GST history; a private preference stores theme, with
+  Android backup disabled; GST uses exact paise math and dated non-exhaustive
+  convenience rates that must be verified against CBIC, CGST receives the
+  half-up half and SGST the remainder, two tabs and a persistent
+  system-initialized theme — full log in `docs/DECISIONS.md`
 - Phase 1 ✅ EMI engine + core screen (2026-10-11) · CI run 38124496188
   green (tip sha `b4f6414`) · APK `app-progress-apk` (10.1 MB) shows a
   working offline EMI calculation: amount/rate/tenure fields + sliders →
@@ -64,17 +69,26 @@
   ₹7,20,524 in interest", a schedule that closes in 85 installments (Prepaid
   per year block + per-month pills) and Total prepaid / Interest saved rows
   — record: `docs/phases/02-prepayments.md`
-- Next: **phase 3 — GST tab + offline data layer** — parts: 3.1 saved
-  loans/GST history Room store (offline, no permissions), 3.2 GST add/remove
-  calculator (CGST/SGST vs IGST, dated slab asset + custom rate, CBIC
-  disclaimer), 3.3 tabbed navigation (EMI · GST) + dark/light theme
+- Phase 3 ✅ GST tab + offline data layer (2026-10-11) · CI [run
+  38129095902](https://github.com/pabi277/Test-app/actions/runs/38129095902)
+  green at tip `af8752a` · uploaded `app-progress-apk` artifact (10,735,264
+  compressed bytes) builds the saved-loan flow, GST history and add/remove
+  calculator with CGST/SGST or IGST, dated presets plus custom rates and CBIC
+  disclaimer, EMI/GST tabs, and persistent light/dark theme; Room close/reopen
+  and GST math tests pass
+  — record: `docs/phases/03-gst-tab.md`
+- Next: **phase 4 — Export + polish** — parts: 4.1 export the schedule as
+  a ₹-formatted PDF and shareable image via SAF; 4.2 accessibility, tablet/
+  low-dpi layout, icon and theme polish
 - Owner action: add the four `ANDROID_KEYSTORE_*` Actions secrets — the
   main-only signed-release job fails without them (`Missing required Actions
   secret: ANDROID_KEYSTORE_BASE64`, first seen on the PR #1 merge run
   38123662318); the unit-test/`app-progress-apk` job is green regardless
 - Open risks / owner items: complete the on-device ten-1-star audit before
-  submission · owner verifies GST slab asset against CBIC portal (law 14) ·
-  Play account + closed-test (≥12 testers/14 days) readiness check
+  submission · owner verifies GST preset asset against current CBIC
+  notifications (law 14; the list is not complete or item/HSN-specific) ·
+  on-device airplane-mode/process-death/theme smoke test · Play account +
+  closed-test (≥12 testers/14 days) readiness check
 
 ## How to continue
 

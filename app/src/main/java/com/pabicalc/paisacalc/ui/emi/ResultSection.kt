@@ -150,7 +150,7 @@ private fun HeroEmiCard(summary: LoanSummary, modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.hero_emi_label),
             style = MaterialTheme.typography.labelMedium,
-            color = onPrimary.copy(alpha = 0.85f),
+            color = onPrimary,
         )
         Text(
             text = IndianNumberFormat.rupees(summary.monthlyEmi),
@@ -164,7 +164,7 @@ private fun HeroEmiCard(summary: LoanSummary, modifier: Modifier = Modifier) {
                 DisplayFormatters.rateLabel(summary.terms.rateMicroPercent),
             ),
             style = MaterialTheme.typography.labelLarge,
-            color = onPrimary.copy(alpha = 0.9f),
+            color = onPrimary,
         )
         HorizontalDivider(color = onPrimary.copy(alpha = 0.25f))
         Text(
@@ -174,7 +174,7 @@ private fun HeroEmiCard(summary: LoanSummary, modifier: Modifier = Modifier) {
                 summary.endMonth.shortLabel(),
             ),
             style = MaterialTheme.typography.labelSmall,
-            color = onPrimary.copy(alpha = 0.85f),
+            color = onPrimary,
         )
     }
 }
