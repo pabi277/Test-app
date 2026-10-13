@@ -62,20 +62,20 @@ jobs:
       - name: Check publish invariants in the release APK
         # Fails the run when the release variant requests a permission the
         # product promises never to use (law 5: zero location/personal-data
-        # collection, no broad storage access) or when an ad unit other than
-        # Google's test unit is compiled into a build that was not given one
-        # through protected configuration. Emits the evidence as check
-        # annotations so it is readable without downloading the artifact.
+        # collection, no broad storage access) or when an ad unit other than a
+        # placeholder or Google's test unit is compiled into a build that was
+        # not given one through protected configuration. Findings are emitted as
+        # check annotations (log downloads resolve to an unreachable host here).
         run: |
           set -uo pipefail
           python3 - <<'PY'
-          import glob, os, re, subprocess, sys
+          import glob, os, re, struct, subprocess, sys
 
-          apk = sorted(glob.glob('app/build/outputs/apk/release/*.apk')) or []
-          if not apk:
+          apk_files = sorted(glob.glob('app/build/outputs/apk/release/*.apk'))
+          if not apk_files:
               print('::error title=release APK::assembleRelease produced no APK')
               sys.exit(1)
-          apk = apk[0]
+          apk = apk_files[0]
           size = os.path.getsize(apk)
           print(f'release APK: {apk} ({size} bytes)')
 
@@ -92,20 +92,24 @@ jobs:
           else:
               annotate('warning', 'aapt2 missing', 'aapt2 was not found; badging evidence unavailable')
 
-          permissions = re.findall(r"uses-permission: name='([^']+)'", badging)
-          if requirements := re.findall(r"uses-permission-sdk-\d+: name='([^']+)'", badging):
-              permissions += requirements
-          version = re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", badging)
-          sdk = re.search(r"sdkVersion:'(\d+)'", badging)
-          target = re.search(r"targetSdkVersion:'(\d+)'", badging)
-
+          permissions = re.findall(r"uses-permission(?:-sdk-\d+)?: name='([^']+)'", badging)
+          def group(pattern, default='?'):
+              match = re.search(pattern, badging)
+              return match.group(1) if match else default
+          package_name = group(r"package: name='([^']+)'")
+          version_code = group(r"versionCode='([^']+)'")
+          version_name = group(r"versionName='([^']+)'")
+          min_sdk = group(r"(?:min)?sdkVersion:'(\d+)'")
+          target_sdk = group(r"targetSdkVersion:'(\d+)'")
           annotate('notice', 'release APK identity',
-                   f"{version.group(1) if version else '?'} | versionCode {version.group(2) if version else '?'}"
-                   f" | versionName {version.group(3) if version else '?'}"
-                   f" | minSdk {sdk.group(1) if sdk else '?'} | targetSdk {target.group(1) if target else '?'}"
-                   f" | {size} bytes")
+                   f'package {package_name} | versionCode {version_code} | versionName {version_name}'
+                   f' | minSdk {min_sdk} | targetSdk {target_sdk} | {size} bytes')
+
           annotate('notice', 'release APK permissions', ', '.join(sorted(permissions)) or 'none declared')
 
+          # Permissions the product promises never to request. Location, contacts,
+          # camera, microphone, phone, SMS, storage, media, calendar and sensors
+          # are all banned outright; anything else unexpected is a warning.
           BANNED = {
               'android.permission.ACCESS_FINE_LOCATION', 'android.permission.ACCESS_COARSE_LOCATION',
               'android.permission.ACCESS_BACKGROUND_LOCATION', 'android.permission.READ_CONTACTS',
@@ -122,9 +126,17 @@ jobs:
               'android.permission.NEARBY_WIFI_DEVICES', 'android.permission.BLUETOOTH_SCAN',
               'android.permission.BLUETOOTH_CONNECT', 'android.permission.BLUETOOTH_ADVERTISE',
           }
+          # Declared by the SDKs in the release build, reviewed in
+          # docs/play/data-safety.md: ads network access, the ads Privacy Sandbox
+          # services, Play Billing, and AndroidX's own receiver permission.
           EXPECTED = {
               'android.permission.INTERNET', 'android.permission.ACCESS_NETWORK_STATE',
               'com.google.android.gms.permission.AD_ID', 'com.android.vending.BILLING',
+              'android.permission.ACCESS_ADSERVICES_AD_ID',
+              'android.permission.ACCESS_ADSERVICES_ATTRIBUTION',
+              'android.permission.ACCESS_ADSERVICES_TOPICS',
+              'android.permission.FOREGROUND_SERVICE', 'android.permission.WAKE_LOCK',
+              'com.pabicalc.paisacalc.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION',
           }
           violations = sorted(set(permissions) & BANNED)
           if violations:
@@ -134,25 +146,72 @@ jobs:
           if unexpected:
               annotate('warning', 'unexpected permission (review)', ', '.join(unexpected))
 
-          # Ad units compiled into this build. Only Google's test publisher is
-          # allowed unless the ad unit came from protected configuration.
+          # Ad units compiled into the build. Google's test publisher is expected;
+          # an all-zero publisher is the placeholder SDKs and docs ship; anything
+          # else is a live unit and must come from protected configuration.
+          TEST_PUBLISHER = 'ca-app-pub-3940256099942544'
           workdir = subprocess.run(['mktemp', '-d'], capture_output=True, text=True).stdout.strip()
           subprocess.run(['unzip', '-q', '-o', apk, '-d', workdir], check=False)
-          found = set()
+          pattern = re.compile(rb'ca-app-pub-\d{16}[~/]\d{10}')
+          found = {}
           for root, _dirs, files in os.walk(workdir):
               for name in files:
-                  with open(os.path.join(root, name), 'rb') as handle:
-                      found |= set(re.findall(rb'ca-app-pub-\d{16}[~/]\d{10}', handle.read()))
-          units = sorted(u.decode() for u in found)
-          annotate('notice', 'ad units in release APK', ', '.join(units) or 'none found')
-          live = [u for u in units if not u.startswith('ca-app-pub-3940256099942544')]
+                  path = os.path.join(root, name)
+                  with open(path, 'rb') as handle:
+                      for unit in pattern.findall(handle.read()):
+                          found.setdefault(unit.decode(), set()).add(
+                              os.path.relpath(path, workdir))
+          units = sorted(found)
+          annotate('notice', 'ad units in release APK',
+                   '; '.join(f'{unit} [{", ".join(sorted(found[unit]))}]' for unit in units) or 'none found')
+
+          def dex_string_neighbours(dex_path, needle):
+              """Show the strings stored next to [needle] — dex string tables group
+              strings by owning class, which identifies the library that ships it."""
+              with open(dex_path, 'rb') as handle:
+                  data = handle.read()
+              if data[:4] != b'dex\n':
+                  return []
+              count, offset = struct.unpack_from('<II', data, 56)
+              def read_string(index):
+                  string_off = struct.unpack_from('<I', data, offset + 4 * index)[0]
+                  position = string_off
+                  while data[position] & 0x80:  # uleb128 utf16 length
+                      position += 1
+                  position += 1
+                  end = data.index(b'\x00', position)
+                  return data[position:end].decode('utf-8', 'replace')
+              try:
+                  strings = [read_string(i) for i in range(count)]
+              except Exception:
+                  return []
+              index = next((i for i, value in enumerate(strings) if value == needle), None)
+              if index is None:
+                  return []
+              neighbours = strings[max(0, index - 3):index + 4]
+              return [value for value in neighbours if value != needle and len(value) < 60]
+
+          unknown = [u for u in units if not u.startswith(TEST_PUBLISHER)]
+          placeholders = [u for u in unknown if u.split('~')[0].split('/')[0] == 'ca-app-pub-0000000000000000']
+          live = [u for u in unknown if u not in placeholders and not u.startswith('ca-app-pub-0000')]
+          if placeholders:
+              annotate('notice', 'placeholder ad id (SDK-provided, not configured)',
+                       ', '.join(placeholders) + ' — all-zero publisher placeholders cannot serve ads')
           if live:
               annotate('error', 'non-test ad unit without protected configuration',
                        ', '.join(live) + ' — live units must come from -Ppaisacalc.rewardedAdUnitId')
               sys.exit(1)
+          for concern in unknown:
+              context = []
+              for dex in sorted(glob.glob(os.path.join(workdir, 'classes*.dex'))):
+                  context += dex_string_neighbours(dex, concern)
+              annotate('notice', f'origin of {concern}',
+                       ' | '.join(dict.fromkeys(context))[:880] or 'string context unavailable')
           if units:
-              annotate('notice', 'ad unit policy', 'test publisher only: this build requests Google test ads')
+              annotate('notice', 'ad unit policy',
+                       'test publisher + SDK placeholders only in this build')
           PY
+
       - name: Upload release APK for device QA (debug-signed, QA only)
         uses: actions/upload-artifact@v4
         with:
