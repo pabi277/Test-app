@@ -29,6 +29,13 @@ android {
         manifestPlaceholders["admobAppId"] = admobAppId
         buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"$rewardedAdUnitId\"")
         buildConfigField("boolean", "USING_TEST_AD_UNITS", usingTestAdUnits.toString())
+
+        // Published privacy policy (phase 6). Empty until the owner hosts the
+        // policy at a public URL — an unset URL hides the in-app link instead of
+        // shipping a dead one. Supply it for a release with
+        // `-Ppaisacalc.privacyPolicyUrl=https://…`.
+        val privacyPolicyUrl = (project.findProperty("paisacalc.privacyPolicyUrl") as String?) ?: ""
+        buildConfigField("String", "PRIVACY_POLICY_URL", "\"$privacyPolicyUrl\"")
     }
 
     signingConfigs {

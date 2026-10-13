@@ -3,6 +3,7 @@ package com.pabicalc.paisacalc.ui.emi
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -59,6 +60,7 @@ import com.pabicalc.paisacalc.engine.PrepaymentStrategy
 import com.pabicalc.paisacalc.export.LoanScheduleImageRenderer
 import com.pabicalc.paisacalc.export.LoanSchedulePdfRenderer
 import com.pabicalc.paisacalc.format.IndianNumberFormat
+import com.pabicalc.paisacalc.legal.PrivacyPolicy
 import com.pabicalc.paisacalc.monetization.MonetizationController
 import com.pabicalc.paisacalc.ui.findActivity
 import com.pabicalc.paisacalc.ui.monetization.AdFreeDialog
@@ -412,6 +414,20 @@ fun EmiCalculatorScreen(
                                     monetization.prepareAdFreePurchase()
                                 },
                             )
+                            // Shown only once the owner has hosted the policy and
+                            // the build was given its URL: no dead links ship.
+                            val privacyPolicyUrl = PrivacyPolicy.url
+                            if (privacyPolicyUrl != null) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_privacy_policy)) },
+                                    onClick = {
+                                        moreActionsExpanded = false
+                                        context.startActivity(
+                                            Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl)),
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 },
