@@ -111,9 +111,9 @@
   — record: `docs/phases/05-ads-iap.md`
 - Phase 6 ✅ Publish readiness (2026-10-13) · CI [run
   38411379003](https://github.com/pabi277/Test-app/actions/runs/38411379003)
-  green at tip `5f6a815` · uploaded `app-release-qa-apk` (11,421,560 bytes — the
+  green at tip `5f6a815` · uploaded `app-release-qa-apk` (11,421,552 bytes — the
   **release** variant, debug-signed for QA) and `app-progress-apk`
-  (15,865,174 bytes) · the release APK is 12,180,110 bytes, versionCode 1,
+  (15,865,176 bytes) · the release APK is 12,180,110 bytes, versionCode 1,
   versionName 0.1.0, minSdk 24, targetSdk 36, and CI verified its packaged
   permission list (INTERNET, ACCESS_NETWORK_STATE, AD_ID, BILLING, ads Privacy
   Sandbox services, FOREGROUND_SERVICE, WAKE_LOCK, AndroidX receiver permission)
