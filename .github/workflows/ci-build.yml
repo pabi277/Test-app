@@ -101,7 +101,7 @@ jobs:
           package_name = group(r"package: name='([^']+)'")
           version_code = group(r"versionCode='([^']+)'")
           version_name = group(r"versionName='([^']+)'")
-          min_sdk = group(r"(?:min)?sdkVersion:'(\d+)'")
+          min_sdk = group(r"(?:min)?[Ss]dkVersion:'(\d+)'")
           target_sdk = group(r"targetSdkVersion:'(\d+)'")
           annotate('notice', 'release APK identity',
                    f'package {package_name} | versionCode {version_code} | versionName {version_name}'
