@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +17,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.core.view.WindowInsetsControllerCompat
 import com.pabicalc.paisacalc.data.PaisaDatabase
 import com.pabicalc.paisacalc.data.PaisaRepository
+import com.pabicalc.paisacalc.monetization.MonetizationController
 import com.pabicalc.paisacalc.ui.PaisaCalcApp
 import com.pabicalc.paisacalc.ui.theme.PaisaCalcTheme
 
@@ -36,6 +38,17 @@ class MainActivity : ComponentActivity() {
             val repository = remember {
                 PaisaRepository(PaisaDatabase.getInstance(applicationContext))
             }
+            val monetization = remember { MonetizationController(applicationContext) }
+
+            // UMP asks for a consent-information update on every launch. It is
+            // the only monetization work that happens before the user acts: the
+            // ads SDK is not initialized and Play billing is not connected.
+            LaunchedEffect(Unit) {
+                monetization.gatherConsent(this@MainActivity)
+            }
+            DisposableEffect(Unit) {
+                onDispose { monetization.shutdown() }
+            }
 
             LaunchedEffect(darkTheme) {
                 preferences.edit().putBoolean(KEY_DARK_THEME, darkTheme).apply()
@@ -50,6 +63,7 @@ class MainActivity : ComponentActivity() {
             PaisaCalcTheme(darkTheme = darkTheme) {
                 PaisaCalcApp(
                     repository = repository,
+                    monetization = monetization,
                     isDarkTheme = darkTheme,
                     onToggleTheme = { darkTheme = !darkTheme },
                 )

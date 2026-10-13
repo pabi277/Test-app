@@ -15,6 +15,20 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+
+        // AdMob configuration (phase 5). The committed defaults are Google's
+        // official TEST app ID and rewarded unit: test ads only, no live unit
+        // ever lives in git. A release swaps both through protected build
+        // configuration (`-Ppaisacalc.admobAppId=… -Ppaisacalc.rewardedAdUnitId=…`)
+        // supplied from Actions secrets, which is an owner GATE.
+        val usingTestAdUnits = project.findProperty("paisacalc.rewardedAdUnitId") == null
+        val admobAppId = (project.findProperty("paisacalc.admobAppId") as String?)
+            ?: "ca-app-pub-3940256099942544~3347511713"
+        val rewardedAdUnitId = (project.findProperty("paisacalc.rewardedAdUnitId") as String?)
+            ?: "ca-app-pub-3940256099942544/5224354917"
+        manifestPlaceholders["admobAppId"] = admobAppId
+        buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"$rewardedAdUnitId\"")
+        buildConfigField("boolean", "USING_TEST_AD_UNITS", usingTestAdUnits.toString())
     }
 
     signingConfigs {
@@ -45,6 +59,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -93,6 +108,12 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
+
+    // Phase 5: the ONE opt-in rewarded placement (Google Mobile Ads + UMP
+    // consent) and the one-time ad-free purchase. Test ad units only.
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
+    implementation(libs.play.billing)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 

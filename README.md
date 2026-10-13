@@ -22,7 +22,8 @@ who is tired of ad walls and data-hungry calculator apps.
 - Saves reusable loans (including the prepayment settings) and recent GST
   calculations in a private on-device Room database.
 - Switches between light and dark themes.
-- Exports the schedule as PDF or a shareable image.
+- Exports the schedule as PDF or a shareable image — unlocked by one
+  optional rewarded ad or by the one-time ad-free purchase.
 - Works fully offline; collects no personal data and needs no location or
   account.
 
@@ -35,11 +36,15 @@ claims that are not present in the current build.]
 
 - Privacy policy: [YOUR_PUBLIC_PRIVACY_POLICY_URL — added at phase 6]
 - Data Safety: see the Google Play listing; it reflects this exact build and
-  all included SDKs (AdMob SDK declared once phase 5 lands).
+  all included SDKs. The Google Mobile Ads SDK and the Google Play Billing
+  library are the only components that can reach the network.
 - Ads: one opt-in rewarded ad to unlock PDF/image export. No interstitials,
-  no banners, never mid-task.
-- Ad-free purchase: one-time purchase removing all ads, with restore.
-- Accounts and backend: none — all data stays on the device.
+  no banners, never mid-task, and no ad request at all unless you tap the
+  unlock. When no ad can be served (offline, no fill), export unlocks anyway
+  for the same 24-hour window — a calculation is never held behind an ad.
+- Ad-free purchase: one-time purchase removing all ads, with restore. Buying
+  it stops every ad request.
+- Accounts and backend: none — all your loan and GST data stays on the device.
 
 ## Build and test
 
@@ -50,14 +55,28 @@ Requirements: JDK 17, Android SDK, and the checked-in Gradle wrapper.
 ./gradlew assembleDebug
 ```
 
+Development builds use Google's test ad units and the `paisacalc_ad_free`
+product ID only; live AdMob identifiers are injected through protected build
+configuration (`-Ppaisacalc.admobAppId=… -Ppaisacalc.rewardedAdUnitId=…`) and
+are never committed.
+
 Release artifacts are built by GitHub Actions. Signing credentials are stored
 in protected Actions secrets, not in this repository. See
 `.github/workflows/ci-build.yml` for the actual workflow.
 
 ## Permissions and data
 
-PaisaCalc requests no location, contacts, phone, or internet permission. PDFs
-can be saved through Android's Storage Access Framework document picker or
+The calculator itself needs no network: EMI, part-prepayments, the schedule
+and the GST tab all work in airplane mode. PaisaCalc requests no location,
+contacts, phone, or storage permission, and no runtime permission at all.
+
+The optional rewarded ad and the ad-free purchase are the only network paths:
+the Google Mobile Ads SDK declares `INTERNET`, `ACCESS_NETWORK_STATE` and
+`AD_ID`, and they are used only after you tap the export unlock or open the
+ad-free entry. The ads SDK's automatic startup component is removed in the
+manifest, so the SDK is initialized on your tap and not before.
+
+PDFs can be saved through Android's Storage Access Framework document picker or
 shared alongside PNG schedules from private cache URIs through the Android
 sharesheet. No broad storage permission is requested. Loan and GST history is
 stored locally in the app's private database; Android cloud and device-transfer

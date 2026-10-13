@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.pabicalc.paisacalc.R
 import com.pabicalc.paisacalc.data.PaisaRepository
+import com.pabicalc.paisacalc.monetization.MonetizationController
 import com.pabicalc.paisacalc.ui.emi.EmiCalculatorScreen
 import com.pabicalc.paisacalc.ui.gst.GstCalculatorScreen
 
@@ -28,6 +29,7 @@ private enum class AppTab { EMI, GST }
 @Composable
 fun PaisaCalcApp(
     repository: PaisaRepository,
+    monetization: MonetizationController,
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
 ) {
@@ -64,6 +66,7 @@ fun PaisaCalcApp(
                 when (selectedTab) {
                     AppTab.EMI -> EmiCalculatorScreen(
                         repository = repository,
+                        monetization = monetization,
                         isDarkTheme = isDarkTheme,
                         onToggleTheme = onToggleTheme,
                     )

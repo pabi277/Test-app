@@ -59,6 +59,10 @@ import com.pabicalc.paisacalc.engine.PrepaymentStrategy
 import com.pabicalc.paisacalc.export.LoanScheduleImageRenderer
 import com.pabicalc.paisacalc.export.LoanSchedulePdfRenderer
 import com.pabicalc.paisacalc.format.IndianNumberFormat
+import com.pabicalc.paisacalc.monetization.MonetizationController
+import com.pabicalc.paisacalc.ui.findActivity
+import com.pabicalc.paisacalc.ui.monetization.AdFreeDialog
+import com.pabicalc.paisacalc.ui.monetization.messageRes
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -146,11 +150,13 @@ private fun exampleInputs(): Pair<EmiInput, PrepaymentInput> = EmiInput(
 @Composable
 fun EmiCalculatorScreen(
     repository: PaisaRepository,
+    monetization: MonetizationController,
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var moreActionsExpanded by remember { mutableStateOf(false) }
+    var adFreeDialogVisible by rememberSaveable { mutableStateOf(false) }
     var amountText by rememberSaveable { mutableStateOf("") }
     var rateText by rememberSaveable { mutableStateOf("") }
     var tenureText by rememberSaveable { mutableStateOf("") }
@@ -184,6 +190,15 @@ fun EmiCalculatorScreen(
     val shareChooserTitle = stringResource(R.string.export_chooser_title)
     val moreOptionsDescription = stringResource(R.string.action_more_options)
     val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    val monetizationState by monetization.state.collectAsState()
+    // One-shot monetization results (reward granted, purchase done, …) surface
+    // as snackbars so they never change a number on screen.
+    LaunchedEffect(monetization) {
+        monetization.events.collect { event ->
+            snackbarHostState.showSnackbar(context.getString(event.messageRes()))
+        }
+    }
     var pendingPdfSummary by remember { mutableStateOf<LoanSummary?>(null) }
     val pdfExportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/pdf"),
@@ -389,6 +404,14 @@ fun EmiCalculatorScreen(
                                     onToggleTheme()
                                 },
                             )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.ads_menu_label)) },
+                                onClick = {
+                                    moreActionsExpanded = false
+                                    adFreeDialogVisible = true
+                                    monetization.prepareAdFreePurchase()
+                                },
+                            )
                         }
                     }
                 },
@@ -463,12 +486,20 @@ fun EmiCalculatorScreen(
                     item {
                         ExportActionsCard(
                             summary = summary,
+                            access = monetizationState.access,
+                            adRequestInFlight = monetizationState.adRequestInFlight,
+                            rewardUnlockExpiresAtMillis = monetizationState.rewardUnlockExpiresAtMillis,
                             onSavePdf = {
                                 pendingPdfSummary = summary
                                 pdfExportLauncher.launch("PaisaCalc-loan-schedule.pdf")
                             },
                             onSharePdf = { shareSchedulePdf(summary) },
                             onShareImage = { shareScheduleImage(summary) },
+                            onWatchRewardedAd = { activity?.let(monetization::requestRewardedExportUnlock) },
+                            onGoAdFree = {
+                                adFreeDialogVisible = true
+                                monetization.prepareAdFreePurchase()
+                            },
                         )
                     }
                     item { BreakdownCard(summary = summary) }
@@ -490,5 +521,15 @@ fun EmiCalculatorScreen(
                 }
             }
         }
+    }
+
+    if (adFreeDialogVisible) {
+        AdFreeDialog(
+            state = monetizationState,
+            onBuy = { activity?.let(monetization::buyAdFree) },
+            onRestore = { monetization.restoreAdFreePurchase() },
+            onShowPrivacyOptions = { activity?.let(monetization::showPrivacyOptions) },
+            onDismiss = { adFreeDialogVisible = false },
+        )
     }
 }

@@ -4,7 +4,7 @@
     <string name="top_bar_subtitle">Offline EMI calculator</string>
     <string name="action_reset">Reset</string>
     <string name="action_example">Example</string>
-    <string name="privacy_pill">No internet needed · no data collected</string>
+    <string name="privacy_pill">Works offline · your data stays on this device</string>
 
     <!-- Inputs -->
     <string name="input_card_title">Loan details</string>
@@ -171,4 +171,36 @@
     <string name="load_saved_loan_accessibility">Load saved loan %1$s</string>
     <string name="remove_saved_loan_accessibility">Remove saved loan %1$s</string>
     <string name="remove_gst_history_accessibility">Remove GST calculation for %1$s at %2$s percent</string>
+
+    <!-- Phase 5: opt-in rewarded export unlock and one-time ad-free purchase -->
+    <string name="export_locked_body">One short ad unlocks export for 24 hours. The EMI, the schedule and the GST tab never need an ad.</string>
+    <string name="export_unlock_watch">Watch an ad to unlock</string>
+    <string name="export_unlock_loading">Loading ad…</string>
+    <string name="export_unlock_buy">Go ad-free</string>
+    <string name="export_unlocked_reward">Unlocked by an ad until %1$s.</string>
+    <string name="export_unlocked_owned">Ad-free — export is always unlocked, and no ad is ever requested.</string>
+    <string name="ads_menu_label">Ads &amp; ad-free</string>
+    <string name="ads_dialog_title">Ads &amp; ad-free</string>
+    <string name="ads_dialog_body">PaisaCalc is free and the calculator always works offline. This build shows one optional rewarded ad, and only when you ask for it: that ad or a one-time purchase unlocks export. Your loan, schedule and GST results never need an ad or a connection.</string>
+    <string name="ads_dialog_owned">You are ad-free — no ad will ever be requested.</string>
+    <string name="ads_dialog_price">One-time purchase · %1$s</string>
+    <string name="ads_dialog_price_unknown">One-time purchase · the price is shown at checkout.</string>
+    <string name="ads_dialog_connecting">Connecting to Google Play…</string>
+    <string name="ads_dialog_billing_unavailable">Google Play billing is not available in this build. Purchases work after installing PaisaCalc from Google Play.</string>
+    <string name="ads_action_buy">Buy ad-free</string>
+    <string name="ads_action_purchasing">Processing…</string>
+    <string name="ads_action_restore">Restore purchase</string>
+    <string name="ads_action_privacy_options">Privacy options</string>
+    <string name="action_close">Close</string>
+    <string name="ads_message_reward_unlocked">Export unlocked for 24 hours.</string>
+    <string name="ads_message_unlock_without_ad">No ad was available, so export is unlocked anyway.</string>
+    <string name="ads_message_already_ad_free">You are already ad-free.</string>
+    <string name="ads_message_purchase_done">Ad-free unlocked. Thank you.</string>
+    <string name="ads_message_purchase_pending">Payment pending — export unlocks when Google Play completes it.</string>
+    <string name="ads_message_purchase_cancelled">Purchase cancelled.</string>
+    <string name="ads_message_purchase_failed">The purchase could not be completed. Please try again.</string>
+    <string name="ads_message_restore_done">Ad-free purchase restored.</string>
+    <string name="ads_message_restore_empty">No ad-free purchase was found for this account.</string>
+    <string name="ads_message_privacy_updated">Privacy choices updated.</string>
+    <string name="ads_message_privacy_failed">Privacy options are not available right now.</string>
 </resources>
